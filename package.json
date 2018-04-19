@@ -11,8 +11,9 @@
     "url": "https://github.ncsu.edu/engr-csc-547/2018-spring-team0.git"
   },
   "dependencies": {
-    "node-ssh": "5.1.1",
-    "express": "4.16.3"
+    "express": "4.16.3",
+    "mysql": "^2.15.0",
+    "node-ssh": "5.1.1"
   },
   "author": "",
   "license": "ISC"
