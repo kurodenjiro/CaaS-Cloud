@@ -28,8 +28,8 @@ router.post('/', function(req ,res) {
   let conhash = "";
   let usedports = [];
 //1. image id,ports from DB
-  
-/*
+
+
   var errHandler = function(err) {
     console.log(err);
   }
@@ -44,87 +44,60 @@ router.post('/', function(req ,res) {
           })
       })
   }).then(function(rows){
+      console.log("First resolve");
+      console.log(rows);
+      // console.log(r);
       imageport = rows;
       let comportquery = "select comport from computer_ports where comid=2 AND comport NOT IN ( select comport from container_ports where comid=2)";
-      console.log(rows);
-      con.query(comportquery, function(err, comrows, fields){
-        if (err) reject(err);
-        resolve(comrows);
+      // console.log(rows);
+      return new Promise(function(resolve, reject) {
+        con.query(comportquery, function(err, comrows, fields){
+          if (err) reject(err);
+          console.log(comrows, "hello");
+          // return comrows;
+          resolve(comrows);
+        })
       })
 
+
   },errHandler).then(function(comrows){
+      console.log("Second resolve");
+      console.log("this is comrows", comrows);
+      console.log("length", imageport.length);
+      // console.log("")
       //3. foreach import map with available port --- map string
+
       for (var i = 0; i < imageport.length; i++) {
           console.log(comrows[i]);
-          portmap=" "+ comrows[i].comport + ":" + imageport[0].import;
-          usedports.push(rows[i].comport);
+          portmap=" "+ comrows[i].comport + ":" + imageport[i].import;
+          usedports.push({comport: comrows[i].comport, import: imageport[i].import });
       }
       console.log(portmap);
       //4. ssh and do docker pull
       //5. ssh and do docker run on compute --- get container hash
-      ssh.connect({
-        host: '159.89.234.84',
-        username: 'root',
-        privateKey: '/home/pavi/.ssh/mydo_rsa'
-      }).then( function() {
-        
-        let sshCmd = 'docker run -d -p '+ portmap +' localhost:5000/my-python:latest';
-        ssh.execCommand(sshCmd, { cwd:'/root' }).then(function(result) {
-          console.log(result.stdout);
-          //conhash = result.stdout;
-          resolve(result.stdout)
-        });
-      });
+      return new Promise(function(resolve, reject) {
+          ssh.connect({
+            host: '159.89.234.84',
+            username: 'root',
+            privateKey: '/home/bhushan/.ssh/id_rsa'
+          }).then( function() {
+
+            let sshCmd = 'docker run -d -p '+ portmap +' localhost:5000/my-python:latest';
+
+            ssh.execCommand(sshCmd, { cwd:'/root' }).then(function(result) {
+              console.log(result.stdout);
+              //conhash = result.stdout;
+              resolve(result.stdout)
+            });
+          });
+      })
+
   },errHandler).then(function(result){
-      console.log(result);
+      console.log(result, "conhash");
             //6. If it works properly -- insert first 12 character of hash in DB
 
   },errHandler);
-*/
-  con.connect(function(err) {
-      let imquery = "SELECT import from images,image_ports WHERE images.imid = image_ports.imid AND images.tag = '"+ data.service+"'";
-      let portmap = "";
-      let conhash = "";
-      con.query(imquery, function(err, rows, fields){
-          if(err) throw err;
-          console.log(rows);
-          var imageport = rows;
-          let comportquery = "select comport from computer_ports where comid=2 AND comport NOT IN ( select comport from container_ports where comid=2)";
 
-          
-          console.log("Rows : " + rows);
-          con.query(comportquery, function(err, comrows, fields){
-              if (err) throw err;
-              //3. foreach import map with available port --- map string
-              for (var i = 0; i < imageport.length; i++) {
-                  console.log(comrows[i]);
-                  portmap=" "+ comrows[i].comport + ":" + imageport[0].import;
-                  usedports.push(rows[i].comport);
-              }
-              console.log(portmap);
-
-              //4. ssh and do docker pull
-              //5. ssh and do docker run on compute --- get container hash
-              ssh.connect({
-                host: '159.89.234.84',
-                username: 'root',
-                privateKey: '/home/pavi/.ssh/mydo_rsa'
-              }).then( function() {
-                
-                let sshCmd = 'docker run -d -p '+ portmap +' localhost:5000/my-python:latest';
-                ssh.execCommand(sshCmd, { cwd:'/root' }).then(function(result) {
-                  console.log(result.stdout);
-                  conhash = result.stdout;
-                });
-              });
-
-          });
-          //6. If it works properly -- insert first 12 character of hash in DB
-
-          
-      });
-  })
-  
 /*
 -------------- TO DO ---------------------------
 docker pull 159.89.234.84:5000/my-python;
