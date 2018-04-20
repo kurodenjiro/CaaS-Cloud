@@ -14,7 +14,7 @@ var router = express.Router();
 router.get('/', function(req, res) {
      res.json({ message: 'welcome' }); // or res.render??
 });
-//     //route to handle user registration
+//   //route to handle user registration
      router.post('/register',login.register); //api for registration
      router.post('/login',login.login) 	//api for login
      app.use('/api', router);

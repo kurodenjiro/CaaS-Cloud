@@ -19,14 +19,11 @@ if(!err) {
 
 exports.register = function(req,res){
   // console.log("req",req.body);
-  var dt = new Date();
   var users={
     "name":req.body.first_name,
-	"type":req.body.type,
+    "type":req.body.type,
     "email":req.body.email,
-    "password":req.body.password,
-    "created":dt,
-    "modified":dt
+    "password":req.body.password
   }
   con.query('INSERT INTO user SET ?',users, function (error, results, fields) {
   if (error) {
