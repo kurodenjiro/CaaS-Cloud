@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel='stylesheet' href='/stylesheets/dashboard.css' />
+</head>
+<body>
+
+<!-- <div class="navbar">
+  <a href="/reservepage">Create Reservation</a>
+  <a href="/myreservationspage">My Reservations</a>
+</div> -->
+Hello, This is admin dashboard
+<br><br><br><br>
+This is container information
+<br><br>
+{{#each Allcontainer as |container|}}
+    ImageID : {{container.imid}}
+    StartTime : {{container.res_start_time}}
+    EndTime : {{container.res_end_time}}
+    State: {{container.state}}
+    Compute Node: {{container.comid}}
+    <hr>
+{{/each}}
+
+<br><br><br><br><br><br>
+This is compute node information
+<br><br>
+{{#each Allcompute as |node|}}
+    Computer ID: {{node.comid}}
+    Public IP: {{node.public_ip}}
+    Private IP: {{node.private_ip}}
+    RAM : {{node.total_ram}}
+    OS : {{node.os}}
+    Cores: {{node.total_cores}}
+    State: {{node.state}}
+    SSH path: {{node.ssh_key_path}}
+    <hr>
+{{/each}}
+</body>
+</html>
