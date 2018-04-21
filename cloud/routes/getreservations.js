@@ -22,7 +22,7 @@ router.get('/', function(req, res, next) {
 
   return new Promise(function(resolve, reject) {
       con.connect(function(err) {
-          let imquery = "SELECT images.tag,creation_time from images,container WHERE images.imid = container.imid AND container.uid ="+ uid +" AND container.state='available'";
+          let imquery = "SELECT images.tag,creation_time,conid from images,container WHERE images.imid = container.imid AND container.uid ="+ uid +" AND container.state='available'";
 
           con.query(imquery, function(err, rows, fields){
               if(err) reject(err);
@@ -32,11 +32,10 @@ router.get('/', function(req, res, next) {
   }).then(function(rows){
       let c=[];
       for(var i=0; i<rows.length;i++){
-      	c.push({name: rows[i].tag, time: rows[i].creation_time});
+      	c.push({name: rows[i].tag, time: rows[i].creation_time, conid: rows[i].conid});
       }
   	  res.render('myreservationpage', { Allcontainer: c });
   },errHandler);
-  //c = [{name: 'Hello', time: '0'}, {name: 'Hi', time: '1'}];
   
 });
 
