@@ -18,7 +18,7 @@ router.get('/', function(req, res, next) {
   // sql.con.query()
 
 
-  let uid=1;
+  let uid=req.session.uid;
 
   var errHandler = function(err) {
     console.log(err);

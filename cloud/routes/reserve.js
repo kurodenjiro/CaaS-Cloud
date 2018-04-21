@@ -33,7 +33,7 @@ router.post('/', function(req ,res) {
   let computeid=3;
   let mgmtip='159.89.234.84';
   let mgmtid=1;
-  let uid=1;
+  let uid=req.session.uid;
 //1. image id,ports from DB
 
 
