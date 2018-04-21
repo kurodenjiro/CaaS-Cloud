@@ -28,6 +28,11 @@ router.post('/', function(req ,res) {
   let conhash = "";
   let usedports = [];
   let imid = 0;
+  let conid=0;
+  let computeip='159.89.234.84';
+  let computeid=2;
+  let mgmtip='159.89.234.84';
+  let mgmtid=1;
 //1. image id,ports from DB
 
 
@@ -50,7 +55,7 @@ router.post('/', function(req ,res) {
       // console.log(r);
       imageport = rows;
       imid = rows[0].imid;
-      let comportquery = "select comport from computer_ports where comid=2 AND comport NOT IN ( select comport from container_ports where comid=2)";
+      let comportquery = "select comport from computer_ports where comid="+computeid+" AND comport NOT IN ( select comport from container_ports where comid="+computeid+")";
       // console.log(rows);
       return new Promise(function(resolve, reject) {
         con.query(comportquery, function(err, comrows, fields){
@@ -72,7 +77,7 @@ router.post('/', function(req ,res) {
       for (var i = 0; i < imageport.length; i++) {
           console.log(comrows[i]);
           portmap=" "+ comrows[i].comport + ":" + imageport[i].import;
-          usedports.push({comport: comrows[i].comport, import: imageport[i].import });
+          usedports.push({comport: comrows[i].comport, import: imageport[i].import ,natport:0 });
       }
       console.log(portmap);
       //4. ssh and do docker pull
@@ -97,7 +102,7 @@ router.post('/', function(req ,res) {
       console.log(result, "conhash");
       //6. If it works properly -- insert first 12 character of hash in DB
       conhash = result;
-      let containerquery = "INSERT INTO container(conid,conhash,comid,uid,imid,profile,res_start_time,res_end_time,creation_time,modified_time,state) VALUES(4,'"+result.substring(0,11)+"', 2, 1,"+imid+",1,'2018-01-01 03:00:00','2018-01-01 03:00:00', NOW(), '2018-01-01 03:00:00', 'available')";
+      let containerquery = "INSERT INTO container(conhash,comid,uid,imid,profile,res_start_time,res_end_time,creation_time,modified_time,state) VALUES('"+result.substring(0,11)+"', "+computeid+", 1,"+imid+",1,'2018-01-01 03:00:00','2018-01-01 03:00:00', NOW(), '2018-01-01 03:00:00', 'available')";
       // console.log(rows);
       return new Promise(function(resolve, reject) {
         con.query(containerquery, function(err, controws, fields){
@@ -105,7 +110,7 @@ router.post('/', function(req ,res) {
           //console.log(comrows, "hello");
           // return comrows;
           if(err) console.log(err);
-          
+
           resolve();
         })
       })
@@ -120,22 +125,72 @@ router.post('/', function(req ,res) {
           // return comrows;
           //if(err) console.log(err);
           console.log(idrows[0].conid);
-          resolve(idrows[0].conid);
+	  conid=idrows[0].conid;
+          resolve();
         })
       })
-  },errHandler).then(function(result){
-      
+  },errHandler).then(function(){
+      console.log("Available nat ports");
+
+      let natquery = "select natport from nat_ports where comid="+mgmtid+" AND natport NOT IN ( select natport from container_ports)";
+      return new Promise(function(resolve, reject) {
+            con.query(natquery, function(err, natrows, fields){
+              if (err) reject(err);
+
+
+              resolve(natrows);
+            });
+      })
+
+
+  },errHandler).then(function(natrows){
+      return new Promise(function(resolve, reject) {
+          //SSH and add IPtables rules
+          console.log("came here",usedports);
+          for (var i = 0; i < usedports.length; i++) {
+              usedports[i]["natport"]= natrows[i].natport;
+          }
+          resolve();
+      })
+  }).then(function(){
+      console.log("IP Tables function");
+
+      // IPtables Nat rules
+      return new Promise(function(resolve, reject) {
+          //SSH and add IPtables rules
+          console.log("came here",usedports);
+          for (var i = 0; i < usedports.length; i++) {
+              let sshCmd = 'iptables -t nat -A PREROUTING -d '+ mgmtip +' -p tcp --dport '+ usedports[i].natport +' -j DNAT --to-destination '+computeip+':'+usedports[i].comport;
+              console.log(sshCmd);
+              ssh.connect({
+                host: '159.89.234.84' ,
+                username: 'root',
+                privateKey: '/home/pavi/.ssh/mydo_rsa'
+              }).then( function() {
+
+                ssh.execCommand(sshCmd, { cwd:'/root' }).then(function(result) {
+                  console.log("Added rules");
+                  console.log(result.stderr);
+                });
+              });
+          }
+          resolve();
+
+      });
+
+  },errHandler).then(function(){
+
       return new Promise(function(resolve,reject){
 
           for( var i=0; i < usedports.length; i++){
-              let portmappingquery = "INSERT INTO container_ports(conid, imid, import, comid, comport) VALUES("+result+","+imid+", "+usedports[i].import+","+2+","+usedports[i].comport+")";
+              let portmappingquery = "INSERT INTO container_ports(conid, imid, import, comid, comport,mgmtid,natport) VALUES("+conid+","+imid+", "+usedports[i].import+","+2+","+usedports[i].comport+","+mgmtid+","+usedports[i].natport+")";
               con.query(portmappingquery, function(err,rows,fields){
                   if(err) reject(err);
                   resolve();
               });
           }
 
-        
+
       })
   },errHandler).then(function(){
       console.log("Reservation completed");
