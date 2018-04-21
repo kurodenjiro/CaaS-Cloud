@@ -193,7 +193,8 @@ router.post('/', function(req ,res) {
 
       })
   },errHandler).then(function(){
-      console.log("Reservation completed");
+      console.log("W completed");
+      res.ren
   },errHandler);
 
 /*
