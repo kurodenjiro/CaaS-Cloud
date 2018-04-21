@@ -24,16 +24,10 @@ router.get('/', function(req ,res) {
 		  con.query("SELECT DISTINCT(computer.comid),computer.private_ip FROM computer,container WHERE container.comid = computer.comid AND container.state='available'", function (err, result, fields) 
 		  {
 		    	if (err) throw reject(err);
-		    	//console.log(result);
-/*		    	for(var i=0;i<result.length;i++){
-		    		saveIP[result[i].comid] = result[i].private_ip ;
-		    	}
-		    	console.log(saveIP);*/
 		    	resolve(result);
 
 		   });
 	  }).then(function(result){
-//	  		return new Promise(function(resolve,reject){
 	  			for(var i=0;i<result.length; i++)
 	  			{
 					var conquery = "SELECT container.conhash,computer.private_ip FROM container,computer where computer.comid = container. comid and container.comid=" + result[i].comid + " AND container.state='available'";
