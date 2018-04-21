@@ -19,7 +19,7 @@ router.get('/', function(req, res, next) {
   c = [{name: 'Hello', time: '0'}, {name: 'Hi', time: '1'}];
   res.render('myreservationpage', { Allcontainer: c });
 
-  let uid=1;
+  let uid=req.session.uid;
 
   var errHandler = function(err) {
     console.log(err);

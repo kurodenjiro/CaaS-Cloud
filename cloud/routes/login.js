@@ -40,6 +40,7 @@ router.post('/', function(req ,res) {
       {
         if(!req.session.username) {
             req.session.username = uname;
+            req.session.uid = results[0].uid;
             console.log(req.session.username);
         }
         if(uname == 'admin')
