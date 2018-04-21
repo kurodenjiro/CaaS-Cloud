@@ -33,6 +33,7 @@ router.post('/', function(req ,res) {
   let computeid=2;
   let mgmtip='159.89.234.84';
   let mgmtid=1;
+  let uid=1;
 //1. image id,ports from DB
 
 
@@ -102,7 +103,7 @@ router.post('/', function(req ,res) {
       console.log(result, "conhash");
       //6. If it works properly -- insert first 12 character of hash in DB
       conhash = result;
-      let containerquery = "INSERT INTO container(conhash,comid,uid,imid,profile,res_start_time,res_end_time,creation_time,modified_time,state) VALUES('"+result.substring(0,11)+"', "+computeid+", 1,"+imid+",1,'2018-01-01 03:00:00','2018-01-01 03:00:00', NOW(), '2018-01-01 03:00:00', 'available')";
+      let containerquery = "INSERT INTO container(conhash,comid,uid,imid,profile,res_start_time,res_end_time,creation_time,modified_time,state) VALUES('"+result.substring(0,11)+"', "+computeid+", "+uid+","+imid+",1,'2018-01-01 03:00:00','2018-01-01 03:00:00', NOW(), '2018-01-01 03:00:00', 'available')";
       // console.log(rows);
       return new Promise(function(resolve, reject) {
         con.query(containerquery, function(err, controws, fields){
@@ -125,7 +126,7 @@ router.post('/', function(req ,res) {
           // return comrows;
           //if(err) console.log(err);
           console.log(idrows[0].conid);
-	  conid=idrows[0].conid;
+          conid=idrows[0].conid;
           resolve();
         })
       })
