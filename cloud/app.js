@@ -10,6 +10,7 @@ var getReservations = require('./routes/getreservations');
 var signupRouter = require('./routes/signup');
 var reserveRouter = require('./routes/reserve');
 var deleteReservation = require('./routes/deleteReservation');
+var loginRouter = require('./routes/login');
 
 var app = express();
 
@@ -27,6 +28,7 @@ app.use('/', indexRouter);
 // app.use('/users', usersRouter);
 app.use('/signup', signupRouter);
 app.use('/deleteReservation', deleteReservation);
+app.use('/login', loginRouter);
 app.get('/dashboard', function(req, res) {
     console.log('THis is nice dashboard');
     res.render('dashboard');
