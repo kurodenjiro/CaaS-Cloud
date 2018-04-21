@@ -1,0 +1,17 @@
+<html>
+<body>
+{{#each Allcontainer as |container|}}
+
+	Image: {{container.name}}
+  Time:  {{container.time}}
+
+
+  <form method="POST" action="/deleteReservation" id="signup">
+    <input type="hidden" name="hash" value="{{container.name}}">
+  	<input type="submit" name="submit" value="Delete">
+  </form>
+  <br>
+
+{{/each}}
+</body>
+</html>

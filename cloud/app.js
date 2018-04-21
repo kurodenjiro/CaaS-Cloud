@@ -5,9 +5,12 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+// var usersRouter = require('./routes/users');
+var getReservations = require('./routes/getreservations');
 var signupRouter = require('./routes/signup');
 var reserveRouter = require('./routes/reserve');
+var deleteReservation = require('./routes/deleteReservation');
+
 var app = express();
 
 // view engine setup
@@ -23,6 +26,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 // app.use('/users', usersRouter);
 app.use('/signup', signupRouter);
+app.use('/deleteReservation', deleteReservation);
 app.get('/dashboard', function(req, res) {
     console.log('THis is nice dashboard');
     res.render('dashboard');
@@ -32,6 +36,7 @@ app.get('/reservepage', function(req, res) {
     console.log('I am onto reserve page');
     res.render('reserve');
 });
+app.use('/myreservationspage', getReservations);
 
 app.use('/reserve', reserveRouter);
 // catch 404 and forward to error handler

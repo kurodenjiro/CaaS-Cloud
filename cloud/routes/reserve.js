@@ -105,7 +105,7 @@ router.post('/', function(req ,res) {
           //console.log(comrows, "hello");
           // return comrows;
           if(err) console.log(err);
-          
+
           resolve();
         })
       })
@@ -124,7 +124,7 @@ router.post('/', function(req ,res) {
         })
       })
   },errHandler).then(function(result){
-      
+
       return new Promise(function(resolve,reject){
 
           for( var i=0; i < usedports.length; i++){
@@ -135,10 +135,11 @@ router.post('/', function(req ,res) {
               });
           }
 
-        
+
       })
   },errHandler).then(function(){
-      console.log("Reservation completed");
+      console.log("W completed");
+      res.ren
   },errHandler);
 
 /*
