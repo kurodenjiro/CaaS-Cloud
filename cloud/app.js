@@ -11,7 +11,7 @@ var signupRouter = require('./routes/signup');
 var reserveRouter = require('./routes/reserve');
 var deleteReservation = require('./routes/deleteReservation');
 var loginRouter = require('./routes/login');
-
+var admindashboardRouter = require('./routes/admindashboard');
 var app = express();
 
 app.use(session({
@@ -38,7 +38,7 @@ app.get('/dashboard', function(req, res) {
     console.log('THis is nice dashboard');
     res.render('dashboard');
 });
-
+app.use('/admindashboard', admindashboardRouter);
 app.get('/reservepage', function(req, res) {
     console.log('I am onto reserve page');
     res.render('reserve');
