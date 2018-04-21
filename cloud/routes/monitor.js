@@ -10,8 +10,6 @@ var con = mysql.createConnection({
   database: "csc547caas"
 });
 
-let saveComputers=[];
-let saveIP = {};
 let c= {};
 router.get('/', function(req ,res) {
 	var errHandler = function(err){
@@ -37,7 +35,7 @@ router.get('/', function(req ,res) {
 						if(err) reject(err);
 
 						for(var j=0; j < conhashrows.length; j++){
-							let sshCmd = "docker inspect 57a2891da621";// + conhashrows[j].conhash;
+							let sshCmd = "docker inspect "+ conhashrows[j].conhash;
 							console.log(sshCmd);
 							
 							return new Promise(function(resolve,reject){
