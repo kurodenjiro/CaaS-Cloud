@@ -30,7 +30,7 @@ router.post('/', function(req ,res) {
   let imid = 0;
   let conid=0;
   let computeip='159.89.234.84';
-  let computeid=2;
+  let computeid=3;
   let mgmtip='159.89.234.84';
   let mgmtid=1;
 //1. image id,ports from DB

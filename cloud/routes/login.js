@@ -38,8 +38,14 @@ router.post('/', function(req ,res) {
     {
       if(password==results[0].password)
       {
-
-        res.redirect('/dashboard');
+        if(!req.session.username) {
+            req.session.username = uname;
+            console.log(req.session.username);
+        }
+        if(uname == 'admin')
+            res.redirect('/admindashboard');
+        else
+            res.redirect('/dashboard');
 			 }
       else
       {
