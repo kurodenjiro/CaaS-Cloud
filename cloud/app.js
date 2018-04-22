@@ -12,6 +12,7 @@ var reserveRouter = require('./routes/reserve');
 var deleteReservation = require('./routes/deleteReservation');
 var loginRouter = require('./routes/login');
 var admindashboardRouter = require('./routes/admindashboard');
+var monitorRouter = require('./routes/monitor');
 var app = express();
 
 app.use(session({
@@ -46,6 +47,7 @@ app.get('/reservepage', function(req, res) {
 app.use('/myreservationspage', getReservations);
 
 app.use('/reserve', reserveRouter);
+app.use('/monitor', monitorRouter);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
