@@ -20,21 +20,22 @@ router.post('/', function(req ,res) {
     console.log('This is good progress');
     let data = req.body;
     console.log(data);
-    var users={
-      "uname":req.body.username,
-      "password":req.body.password,
-      "type":req.body.type
-    }
+    //var users={
+    var uname = req.body.username;
+    var password= req.body.password;
+    var type =req.body.type;
+    //}
     // put the data into the database
     // res.redirect to dashboard
 
+    let userquery = "INSERT INTO user (uname, password,email) VALUES ('"+ uname+"', '"+ password+"', 'default@csc.com' )";
 
-    con.query('INSERT INTO user SET ?',users, function (error, results, fields) {
+    con.query(userquery,function (error, results, fields) {
       if (error) {
         console.log("error",error);
         res.send({
           "code":400,
-          "failed":"error"
+          "failed":"Username already exists, choose another username"
         })
       }else{
         console.log('User registered: ', results);
