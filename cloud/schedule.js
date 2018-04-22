@@ -1,34 +1,34 @@
 
 var mysql = require('mysql')
 
-var con = mysql.createConnection({
-  host: "159.89.234.84",
-  user: "pavi",
-  password: "csc547",
-  database: "csc547caas"
-});
 
-Class Schedule{
-function create_schedule(data,callback) 
+class Schedule {
+	constructor() {
+	
+
+	
+this.create_schedule = function (con, data) 
 {
-	console.log('This is reserve route');
+	console.log('schedule:This is reserve route');
     	
 	let image_details;
 	let hosts;
     	console.log(data);
-        var errHandler = function(err) {
-    		console.log(err);
-  	}
+        //var errHandler = function(err) {
+    //	console.log(err);
+  	//}
 
     	return new Promise(function(resolve,reject)
 	{
-		con.connect(function(err) 
-		{
-        		if (err) throw err;
-        		var service = data.tag
+		console.log("beforeconn")
+		
+			console.log("beforeerror");
+        		
+			console.log("aftererror");
+        		var service = data.service
         	
-        		console.log(service+"qwerrty")
-        		con.query("SELECT os,ram,cores FROM images WHERE images.tag = '"+service+"'",function (err, result, fields)
+        		console.log(data.service+"qwerrty")
+        		con.query("SELECT os,ram,cores FROM images WHERE images.tag = '"+service+"';",function (err, result, fields)
 			{
           			if (err) throw err;
           			console.log(result);
@@ -40,18 +40,20 @@ function create_schedule(data,callback)
 				{
 					resolve(result);
 				}
-			})
-		})
+			});
+		
 	}).then(function(result)
 	{
-		image_details = result;
+		image_details = result[0];
 		var os = result[0].os
 		console.log("os:"+os);
-		var conquery = "Select comid, (select sum(im.ram) from container con join images im on con.imid = im.imid where comid = com.comid and '"+data.start+"' < con.res_end_time and '"+ data.end+"' > con.res_start_time) as used_ram, (select sum(im.cores) from container con join images im on con.imid = im.imid where comid = com.comid and '"+ data.start+"' < con.res_end_time and '"+ data.end+"' > con.res_start_time) as used_cores, com.total_ram, com.total_cores from computer com where os = '"+os+"'";
+		var conquery = "Select comid, (select sum(im.ram) from container con join images im on con.imid = im.imid where comid = com.comid and '"+data.start+"' < con.res_end_time and '"+ data.end+"' > con.res_start_time) as used_ram, (select sum(im.cores) from container con join images im on con.imid = im.imid where comid = com.comid and '"+ data.start+"' < con.res_end_time and '"+ data.end+"' > con.res_start_time) as used_cores, com.total_ram, com.total_cores from computer com where os = '"+os+"';";
 		return new Promise(function(resolve,reject)
 		{
+			console.log("forhost quesry:"+conquery)
 			con.query(conquery,function(err,result1,fields)
-			{			
+			{		
+				console.log("inside host query")	
 				if (err) throw err;
 				console.log(result1);
 				if(!result1)
@@ -98,6 +100,7 @@ function create_schedule(data,callback)
 		{
 			console.log("qwerty"+chosen_host);
 			return new Promise(function(resolve,reject){
+				
 				resolve(chosen_host);
 			});
 		}						
@@ -106,6 +109,7 @@ function create_schedule(data,callback)
 								
     // Insert the data into database and spinup the container.
 
+}
 }
 }
 

@@ -3,7 +3,10 @@ var router = express.Router();
 var mysql = require('mysql')
 var main = require('../app');
 var NODE_SSH = require('node-ssh');
+var schedule = require('../schedule');
+var dateTime = require('node-datetime');
 
+var scheduleObject = new schedule();
 
 ssh = new NODE_SSH();
 /* POST user signup. */
@@ -30,7 +33,7 @@ router.post('/', function(req ,res) {
   let imid = 0;
   let conid=0;
   let computeip='159.89.234.84';
-  let computeid=3;
+  let computeid;
   let mgmtip='159.89.234.84';
   let mgmtid=1;
   let uid=req.session.uid;
@@ -46,22 +49,28 @@ router.post('/', function(req ,res) {
           let imquery = "SELECT import,images.imid from images,image_ports WHERE images.imid = image_ports.imid AND images.tag = '"+ data.service+"'";
 
           con.query(imquery, function(err, rows, fields){
-              if(err) reject(err);
+              if(err) throw(err);
               resolve(rows);
           })
       })
   }).then(function(rows){
-      console.log("First resolve");
+      console.log("resolve:image ports:"+rows);
       console.log(rows);
       // console.log(r);
       imageport = rows;
       imid = rows[0].imid;
+	
+	scheduleObject.create_schedule(con, data).then(function(value){
+		console.log("insideschedulecall");
+		computeid=value;
+	})
+	console.log("hostid:"+computeid);
       let comportquery = "select comport from computer_ports where comid="+computeid+" AND comport NOT IN ( select comport from container_ports where comid="+computeid+")";
-      // console.log(rows);
+       //console.log(rows);
       return new Promise(function(resolve, reject) {
         con.query(comportquery, function(err, comrows, fields){
-          if (err) reject(err);
-          console.log(comrows, "hello");
+          if (err) throw(err);
+          //console.log("resolve:computer ports:"+comrows);
           // return comrows;
           resolve(comrows);
         })
@@ -69,9 +78,10 @@ router.post('/', function(req ,res) {
 
 
   },errHandler).then(function(comrows){
-      console.log("Second resolve");
-      console.log("this is comrows", comrows);
-      console.log("length", imageport.length);
+      //console.log("Second resolve");
+      //console.log("this is comrows", comrows);
+      //console.log("length", imageport.length);
+	console.log("resolve:computer ports:"+comrows);
       // console.log("")
       //3. foreach import map with available port --- map string
 
@@ -83,11 +93,21 @@ router.post('/', function(req ,res) {
       console.log(portmap);
       //4. ssh and do docker pull
       //5. ssh and do docker run on compute --- get container hash
+	
+	let computequery="select * from  computer where comid="+computeid+";"; 
+	return new Promise(function(resolve,reject){
+		con.query(computequery, function(err,comprows,fields){
+			if(err)  reject(err);
+			resolve(comprows);			
+		})
+			
+	}).then(function(comprows){
+
       return new Promise(function(resolve, reject) {
           ssh.connect({
-            host: '159.89.234.84',
+            host: comprows[0].public_ip,
             username: 'root',
-            privateKey: '/home/pavi/.ssh/mydo_rsa'
+            privateKey: comprows[0].ssh_key_path//'/home/pavi/.ssh/mydo_rsa'
           }).then( function() {
 
             let sshCmd = 'docker run -d -p '+ portmap +' localhost:5000/my-python:latest';
@@ -98,12 +118,15 @@ router.post('/', function(req ,res) {
             });
           });
       })
+	})
 
   },errHandler).then(function(result){
       console.log(result, "conhash");
       //6. If it works properly -- insert first 12 character of hash in DB
       conhash = result;
-      let containerquery = "INSERT INTO container(conhash,comid,uid,imid,profile,res_start_time,res_end_time,creation_time,modified_time,state) VALUES('"+result.substring(0,11)+"', "+computeid+", "+uid+","+imid+",1,'2018-01-01 03:00:00','2018-01-01 03:00:00', NOW(), '2018-01-01 03:00:00', 'available')";
+	var dt = dateTime.create();
+	var formatted = dt.format('YYYY-mm-dd HH:MM:SS');
+      let containerquery = "INSERT INTO container(conhash,comid,uid,imid,profile,res_start_time,res_end_time,creation_time,modified_time,state) VALUES('"+result.substring(0,11)+"', "+computeid+", "+uid+","+imid+","+data.profile+",'"+data.start+"','"+data.end+"', '"+formatted+"', null, 'available')";
       // console.log(rows);
       return new Promise(function(resolve, reject) {
         con.query(containerquery, function(err, controws, fields){
@@ -184,7 +207,7 @@ router.post('/', function(req ,res) {
       return new Promise(function(resolve,reject){
 
           for( var i=0; i < usedports.length; i++){
-              let portmappingquery = "INSERT INTO container_ports(conid, imid, import, comid, comport,mgmtid,natport) VALUES("+conid+","+imid+", "+usedports[i].import+","+2+","+usedports[i].comport+","+mgmtid+","+usedports[i].natport+")";
+              let portmappingquery = "INSERT INTO container_ports(conid, imid, import, comid, comport,mgmtid,natport) VALUES("+conid+","+imid+", "+usedports[i].import+","+computeid+","+usedports[i].comport+","+mgmtid+","+usedports[i].natport+")";
               con.query(portmappingquery, function(err,rows,fields){
                   if(err) reject(err);
                   resolve();
