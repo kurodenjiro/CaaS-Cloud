@@ -13,6 +13,8 @@ var deleteReservation = require('./routes/deleteReservation');
 var loginRouter = require('./routes/login');
 var admindashboardRouter = require('./routes/admindashboard');
 var monitorRouter = require('./routes/monitor');
+var billing = require('./routes/billing');
+
 var app = express();
 
 app.use(session({
@@ -45,6 +47,7 @@ app.get('/reservepage', function(req, res) {
     res.render('reserve');
 });
 app.use('/myreservationspage', getReservations);
+app.use('/billingpage', billing);
 
 app.use('/reserve', reserveRouter);
 app.use('/monitor', monitorRouter);

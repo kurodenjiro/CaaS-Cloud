@@ -22,7 +22,7 @@ router.post('/', function(req, res) {
 	}
 	return new Promise(function(resolve, reject) {
 	    con.connect(function(err) {
-	        let statequery = "UPDATE container SET state='deleted' WHERE conid="+req.body.conid;
+	        let statequery = "UPDATE container SET state='deleted',res_end_time=NOW() WHERE conid="+req.body.conid;
 	        con.query(statequery, function(err, rows, fields){
 	            if(err) reject(err);
 	            resolve();
