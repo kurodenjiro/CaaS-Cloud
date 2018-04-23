@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel='stylesheet' href='/stylesheets/dashboard.css' />
+</head>
+<body>
+
+
+<h1> Realtime Monitoring </h1>
+<br><br>
+<h2> Compute Node information </h2>
+<hr>
+{{#each computer}}
+    {{@key}}: {{this}} <br>
+{{/each}}
+
+<br>
+
+<br><br><br><br>
+{{#each container}}
+  List of containers running on: {{@key}} 
+  <hr>
+  {{#each this}}
+    Container hash: {{@key}} State: {{this}}
+    <br><br>
+  {{/each}}
+{{/each}}
+</body>
+</html>

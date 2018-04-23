@@ -3,12 +3,41 @@ var router = express.Router();
 var mysql = require('mysql');
 var main = require('../app');
 
+var http = require('http');
+
+var server = http.createServer(function(req, res) {
+    // fs.readFile('./index.html', 'utf-8', function(error, content) {
+    //     res.writeHead(200, {"Content-Type": "text/html"});
+    //     res.end(content);
+    console.log('Server has initiated');
+});
+
+
+var io = require('socket.io').listen(server);
 var con = mysql.createConnection({
     host: "159.89.234.84",
     user: "pavi",
     password: "csc547",
     database: "csc547caas"
 });
+var client1;
+io.sockets.on('connection', function (socket) {
+console.log('A client is connected!');
+socket.on('msg', function(...args) {
+    var d = {
+        //hardcode IP: 'computeIPAddress'
+        freemem: args[0],
+        totalmem: args[1],
+        uptime: args[2],
+        avgLoad: args[3],
+        cores: args[4]
+    }
+    client1 = d;
+    console.log('Client says', ...args)
+
+})
+});
+server.listen(8080);
 
 let c = {};
 con.connect();
@@ -89,6 +118,16 @@ router.get('/', function(req, res) {
                 }).then(function(result) {
                     console.log('This is final dictionary after running for loop', result);
                     console.log('We are ready to render the page now.')
+                    let c = [];
+                    // for (let key in result) {
+                    //     c
+                    // }
+                    // var 'client1';
+
+                    res.render('monitor', {container: result, computer: client1});
+
+
+
                 })
             })
         }
