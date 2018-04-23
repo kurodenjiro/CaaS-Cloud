@@ -47,7 +47,7 @@ app.get('/reservepage', function(req, res) {
     res.render('reserve');
 });
 app.use('/myreservationspage', getReservations);
-app.use('/billingpage', billing);
+app.use('/billing', billing);
 
 app.use('/reserve', reserveRouter);
 app.use('/monitor', monitorRouter);

@@ -45,7 +45,7 @@ router.post('/', function(req ,res) {
                         req.session.uid = results[0].uid;
                         console.log(req.session.username);
                     }
-                    if(uname == 'admin')
+                    if(results[0].type == 'admin')
                         res.redirect('/admindashboard');
                     else
                         res.redirect('/dashboard');
