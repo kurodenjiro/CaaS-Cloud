@@ -35,7 +35,7 @@ router.post('/', function(req ,res)
   let conid=0;
   let computeip='159.89.234.84';
   let computeid;
-  let mgmtip='localhost';
+  let mgmtip='159.89.234.84';
   let mgmtid=1;
   let uid=req.session.uid;
   let computer;
@@ -115,7 +115,7 @@ router.post('/', function(req ,res)
             							privateKey: computer.ssh_key_path//'/home/pavi/.ssh/mydo_rsa'
           						}).then( function() {
 
-            							let sshCmd = 'docker run -d -p '+ portmap +' localhost:5000/my-python:latest';
+            							let sshCmd = 'docker run -d -p '+ portmap +' '+mgmtip+':5000/'+data.service+':latest';
 
             							ssh.execCommand(sshCmd, { cwd:'/root' }).then(function(result) {
               								console.log(result.stdout);
@@ -191,10 +191,10 @@ router.post('/', function(req ,res)
           					//SSH and add IPtables rules
           					console.log("came here",usedports);
           					for (var i = 0; i < usedports.length; i++) {
-              					let sshCmd = 'iptables -t nat -A PREROUTING -d '+ mgmtip +' -p tcp --dport '+ usedports[i].natport +' -j DNAT --to-destination '+computeip+':'+usedports[i].comport;
+              					let sshCmd = 'iptables -t nat -A PREROUTING -d '+ mgmtip +' -p tcp --dport '+ usedports[i].natport +' -j DNAT --to-destination '+computer.public_ip+':'+usedports[i].comport;
               					console.log(sshCmd);
               					ssh.connect({
-            						host: mgmtip,
+            						host: 'localhost',
             						username: 'root',
             						//privateKey: '/home/pavi/.ssh/mydo_rsa'
           					}).then( function() {
