@@ -41,6 +41,12 @@ router.post('/', function(req ,res) {
                 })
               }else{
                 console.log('User registered: ', results);
+                if(!req.session.username) {
+                        req.session.username = uname;
+                        req.session.uid = results.insertId;
+                        console.log("username",req.session.username);
+                        console.log("uid",req.session.uid);
+                }
                 res.redirect('/dashboard');
               }
           });
