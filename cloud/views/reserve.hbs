@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+
+<form method="POST" action="/reserve" id="reserveform">
+  Service: <select name="service">
+              <option value="testtag">Service 1</option>
+              <option value="S2">Service 2</option>
+              <option value="S3">Service 3</option>
+              <option value="S4">Service 4</option>
+              <option value="S5">Service 5</option>
+           </select>
+           <br><br>
+  Duration: <select name="duration">
+              <option value="2">2 Hrs</option>
+              <option value="4">4 Hrs</option>
+              <option value="6">6 Hrs</option>
+              <option value="8">8 Hrs</option>
+           </select>
+           <br><br>
+  When: <input type="radio" value="1" name="radiobutton"> Now &nbsp&nbsp
+
+
+            Later &nbsp&nbsp
+            <input type="radio" value="0" name="radiobutton">
+            <select name="day" form="reserveform">
+                        <option value="Monday">Monday</option>
+                        <option value="Tuesday">Tuesday</option>
+                        <option value="Wednesday">Wednesday</option>
+                        <option value="Thursday">Thursday</option>
+                        <option value="Friday">Friday</option>
+                        <option value="Saturday">Saturday</option>
+                        <option value="Sunday">Sunday</option>
+
+            </select>
+            &nbsp&nbsp
+            <select name="hr" form="reserveform">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                        <option value="11">11</option>
+                        <option value="12">12</option>
+            </select>
+            &nbsp&nbsp
+            <select name="ampm" form="reserveform">
+                        <option value="AM">AM</option>
+                        <option value="PM">PM</option>
+            </select>
+            &nbsp&nbsp EST
+            <br><br>
+	<input type="submit" name="submit" value="Sign Up">
+</form>
+<!-- After form submission we can render this template with the result and stuff in reserve router-->
+</body>
+</html>
