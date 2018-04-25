@@ -2,13 +2,13 @@
 <html>
 
 <form method="POST" action="/reserve" id="reserveform">
+  
   Service: <select name="service">
-              <option value="testtag">Service 1</option>
-              <option value="S2">Service 2</option>
-              <option value="S3">Service 3</option>
-              <option value="S4">Service 4</option>
-              <option value="S5">Service 5</option>
+  {{#each Allimages as |image|}}
+              <option value="{{image.name}}">{{image.name}}</option>
+  {{/each}}
            </select>
+  
            <br><br>
   Duration: <select name="duration">
               <option value="2">2 Hrs</option>

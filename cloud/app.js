@@ -8,6 +8,7 @@ var indexRouter = require('./routes/index');
 // var usersRouter = require('./routes/users');
 var getReservations = require('./routes/getreservations');
 var signupRouter = require('./routes/signup');
+var reservepageRouter = require('./routes/reservepage');
 var reserveRouter = require('./routes/reserve');
 var deleteReservation = require('./routes/deleteReservation');
 var loginRouter = require('./routes/login');
@@ -42,10 +43,7 @@ app.get('/dashboard', function(req, res) {
     res.render('dashboard');
 });
 app.use('/admindashboard', admindashboardRouter);
-app.get('/reservepage', function(req, res) {
-    console.log('I am onto reserve page');
-    res.render('reserve');
-});
+app.use('/reservepage', reservepageRouter);
 app.use('/myreservationspage', getReservations);
 app.use('/billing', billing);
 
