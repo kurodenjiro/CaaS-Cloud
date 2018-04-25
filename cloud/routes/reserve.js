@@ -58,8 +58,8 @@ router.post('/', function(req ,res)
           		let imquery = "SELECT import,images.imid from images,image_ports WHERE images.imid = image_ports.imid AND images.tag = '"+ data.service+"'";
 
           		con.query(imquery, function(err, rows, fields){
-              			if(err) throw(err);
-       				resolve(rows);
+                  if(err) throw(err);
+       				    resolve(rows);
           		})
       		})
   	}).then(function(rows){
@@ -82,11 +82,8 @@ router.post('/', function(req ,res)
         			})
       	  		})
 	},errHandler).then(function(comrows){
-      				//console.log("Second resolve");
-      				//console.log("this is comrows", comrows);
-      				//console.log("length", imageport.length);
 				console.log("resolve:computer ports:"+comrows);
-      				// console.log("")
+      				
       				//3. foreach import map with available port --- map string
 
       				for (var i = 0; i < imageport.length; i++) {
@@ -98,24 +95,24 @@ router.post('/', function(req ,res)
       				//4. ssh and do docker pull
       				//5. ssh and do docker run on compute --- get container hash
 	
-				let computequery="select * from  computer where comid="+computeid+";"; 
+				let computequery="select * from  computer where comid="+computeid+" OR comid="+mgmtid+" ORDER BY comid"; 
 				return new Promise(function(resolve,reject){
 					con.query(computequery, function(err,comprows,fields){
 						if(err)  reject(err);
+            mgmtip=comprows[0].private_ip;
 						resolve(comprows);			
 					})
 			
 				}).then(function(comprows){
-						computer=comprows[0];
+						computer=comprows[1];
 						
       						return new Promise(function(resolve, reject) {
           						ssh.connect({
-            							host: computer.public_ip,
-            							username: 'root',
-            							privateKey: computer.ssh_key_path//'/home/pavi/.ssh/mydo_rsa'
+            							host: computer.private_ip,
+            							username: 'root'
           						}).then( function() {
 
-            							let sshCmd = 'docker run -d -p '+ portmap +' '+mgmtip+':5000/'+data.service+':latest';
+            							let sshCmd = 'docker pull '+mgmtip+':5000/'+data.service+' && docker run -d -p '+ portmap +' '+mgmtip+':5000/'+data.service+':latest';
 
             							ssh.execCommand(sshCmd, { cwd:'/root' }).then(function(result) {
               								console.log(result.stdout);
@@ -191,7 +188,7 @@ router.post('/', function(req ,res)
           					//SSH and add IPtables rules
           					console.log("came here",usedports);
           					for (var i = 0; i < usedports.length; i++) {
-              					let sshCmd = 'iptables -t nat -A PREROUTING -d '+ mgmtip +' -p tcp --dport '+ usedports[i].natport +' -j DNAT --to-destination '+computer.public_ip+':'+usedports[i].comport;
+              					let sshCmd = 'iptables -t nat -A PREROUTING -d '+ mgmtip +' -p tcp --dport '+ usedports[i].natport +' -j DNAT --to-destination '+computer.private_ip+':'+usedports[i].comport;
               					console.log(sshCmd);
               					ssh.connect({
             						host: 'localhost',

@@ -75,6 +75,8 @@ this.create_schedule = function (con, data)
 		{
 			var host = hosts[i]; 
 			console.log(host);
+			if(host.comid==1)
+				continue;
 			if(!host.used_ram || !host.used_cores)
 			{
 				chosen_host=host.comid;
