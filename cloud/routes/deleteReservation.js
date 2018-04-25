@@ -4,8 +4,8 @@ var mysql = require('mysql')
 var main = require('../app');
 
 var con = mysql.createConnection({
-  host: "159.89.234.84",
-  user: "pavi",
+  host: "152.14.112.129",
+  user: "caas",
   password: "csc547",
   database: "csc547caas"
 });
@@ -15,6 +15,7 @@ router.post('/', function(req, res) {
     console.log(req.body);
 
     let mgmtid=1;
+    let compute_ip;
 
 
 	var errHandler = function(err) {
@@ -43,12 +44,12 @@ router.post('/', function(req, res) {
 	        //SSH and add IPtables rules
 	        console.log("came here",natrows);
 	        for (var i = 0; i < natrows.length; i++) {
+	        	compute_ip=natrows[0].private_ip;
 	            let sshCmd = 'iptables -t nat -D PREROUTING -d '+ natrows[i].public_ip +' -p tcp --dport '+ natrows[i].natport +' -j DNAT --to-destination '+ natrows[i].private_ip +':'+ natrows[i].comport;
 	            console.log(sshCmd);
 	            ssh.connect({
 	              host: '159.89.234.84' , /// MAnagement IP -----------CHANGE HERE
-	              username: 'root',
-	              privateKey: '/home/pavi/.ssh/mydo_rsa'
+	              username: 'root'
 	            }).then( function() {	
 	              ssh.execCommand(sshCmd, { cwd:'/root' }).then(function(result) {
 	                console.log("Deleted rules");
@@ -69,9 +70,8 @@ router.post('/', function(req, res) {
 	},errHandler).then(function(conhash){
 	    return new Promise(function(resolve, reject) {
 	    	ssh.connect({
-	            host: '159.89.234.84',
-	            username: 'root',
-	            privateKey: '/home/pavi/.ssh/mydo_rsa'
+                host: compute_ip,
+	            username: 'root'
 	        }).then( function() {
 	            let sshCmd = 'docker stop '+ conhash +' && sleep 30s &&  docker rm '+ conhash;
 	            ssh.execCommand(sshCmd, { cwd:'/root' }).then(function(result) {
@@ -84,8 +84,6 @@ router.post('/', function(req, res) {
 	    let delquery = "DELETE from container_ports WHERE conid="+req.body.conid;
 	    return new Promise(function(resolve,reject){
 		    con.query(delquery,function(err,natrows,fields){
-		    	/*if(err) reject(err);
-		    	resolve(natrows);*/
 		    	if(err) console.log(err);
 		    	console.log("Delete Successful");
 		    })

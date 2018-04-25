@@ -11,8 +11,8 @@ var scheduleObject = new schedule();
 ssh = new NODE_SSH();
 /* POST user signup. */
 var con = mysql.createConnection({
-  host: "159.89.234.84",
-  user: "pavi",
+  host: "152.14.112.129",
+  user: "caas",
   password: "csc547",
   database: "csc547caas"
 });
@@ -195,8 +195,7 @@ router.post('/', function(req ,res)
               					console.log(sshCmd);
               					ssh.connect({
             						host: 'localhost',
-            						username: 'root',
-            						//privateKey: '/home/pavi/.ssh/mydo_rsa'
+            						username: 'root'
           					}).then( function() {
 
                 					ssh.execCommand(sshCmd, { cwd:'/root' }).then(function(result) {
@@ -231,7 +230,6 @@ router.post('/', function(req ,res)
 /*
 -------------- TO DO ---------------------------
 docker pull 159.89.234.84:5000/my-python;
-6.5 add used port in DB container_ports
 7. Print reservation connection info
 8. Security for ssh
 */

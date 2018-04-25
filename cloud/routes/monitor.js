@@ -15,8 +15,8 @@ var server = http.createServer(function(req, res) {
 
 var io = require('socket.io').listen(server);
 var con = mysql.createConnection({
-    host: "159.89.234.84",
-    user: "pavi",
+    host: "152.14.112.129",
+    user: "caas",
     password: "csc547",
     database: "csc547caas"
 });
@@ -80,9 +80,8 @@ router.get('/', function(req, res) {
                         return new Promise(function(resolve, reject) {
                             console.log('Inside promise');
                             ssh.connect({
-                                host: '159.89.234.84', //conhashrows[j].private_ip,
-                                username: 'root',
-                                privateKey: '/home/bhushan/.ssh/id_rsa'
+                                host: conhashrows[j].private_ip,
+                                username: 'root'
                             }).then(async function() {
                                 console.log('Connected')
                                 await sleep(250);
