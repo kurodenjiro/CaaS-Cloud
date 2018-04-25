@@ -12,7 +12,7 @@ ssh = new NODE_SSH();
 /* POST user signup. */
 var con = mysql.createConnection({
   host: "localhost",
-  user: "caas",
+  user: "pavi",
   password: "csc547",
   database: "csc547caas"
 });
@@ -144,7 +144,7 @@ router.post('/', function(req ,res)
 								let sshCmd = NULL;
 								if(profile == 2)
 								{
-									sshCmd = 'mkdir /root/local'+conid+'; docker-machine ssh dev mkdir /root/remote'+conid+'; eval $(docker-machine env dev); docker pull '+mgmtip+':5000/'+data.service+' && docker run -d -p '+ portmap +' -v /root/local'+conid+':/root/'+conid+' '+mgmtip+':5000/'+data.service+':latest';
+									sshCmd = 'mkdir /local'+conid+'; docker-machine ssh storage mkdir /remote'+conid+'; eval $(docker-machine env storage); docker pull '+mgmtip+':5000/'+data.service+' && docker run -d -p '+ portmap +' -v /local'+conid+':/root/'+conid+' '+mgmtip+':5000/'+data.service+':latest';
 								}
 								else
 								{
