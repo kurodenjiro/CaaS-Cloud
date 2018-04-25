@@ -5,7 +5,7 @@ var main = require('../app');
 var NODE_SSH = require('node-ssh');
 var schedule = require('../schedule');
 var dateTime = require('node-datetime');
-
+const exec = require('child_process').exec;
 var scheduleObject = new schedule();
 
 ssh = new NODE_SSH();
