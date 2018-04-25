@@ -146,10 +146,9 @@ router.post('/', function(req ,res)
 				//result='abcshhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh8888';
       				console.log(result, "conhash");
       					//6. If it works properly -- insert first 12 character of hash in DB
-      				conhash = result;
-				//var dt = dateTime.create();
-				//var formatted = dt.format('YYYY-mm-dd HH:MM:SS');
-      				let containerquery = "INSERT INTO container(conhash,comid,uid,imid,profile,res_start_time,res_end_time,creation_time,modified_time,state) VALUES('"+result.substring(0,11)+"', "+computeid+","+uid+","+imid+","+data.profile+",'"+startdate+"','"+enddate+"', NOW(), null, 'available')";
+      				conhash = result.split("\n");
+
+      				let containerquery = "INSERT INTO container(conhash,comid,uid,imid,profile,res_start_time,res_end_time,creation_time,modified_time,state) VALUES('"+conhash[conhash.length -1].substring(0,11)+"', "+computeid+","+uid+","+imid+","+data.profile+",'"+startdate+"','"+enddate+"', NOW(), null, 'available')";
       				// console.log(rows);
       				return new Promise(function(resolve, reject) {
 						console.log(containerquery);
@@ -219,16 +218,6 @@ router.post('/', function(req ,res)
                             console.log('stdout ', stdout);
                             console.log('stderr ', stderr);
                         });
-/*              					ssh.connect({
-            						host: 'localhost',
-            						username: 'root'
-          					}).then( function() {
-
-                					ssh.execCommand(sshCmd, { cwd:'/root' }).then(function(result) {
-                  						console.log("Added rules");
-                  						console.log(result.stderr);
-                					});
-              					});*/
           					}
           					resolve();
 

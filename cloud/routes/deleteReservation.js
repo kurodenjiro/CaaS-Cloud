@@ -47,15 +47,14 @@ router.post('/', function(req, res) {
 	        	compute_ip=natrows[0].private_ip;
 	            let sshCmd = 'iptables -t nat -D PREROUTING -d '+ natrows[i].public_ip +' -p tcp --dport '+ natrows[i].natport +' -j DNAT --to-destination '+ natrows[i].private_ip +':'+ natrows[i].comport;
 	            console.log(sshCmd);
-	            ssh.connect({
-	              host: '159.89.234.84' , /// MAnagement IP -----------CHANGE HERE
-	              username: 'root'
-	            }).then( function() {	
-	              ssh.execCommand(sshCmd, { cwd:'/root' }).then(function(result) {
-	                console.log("Deleted rules");
-	                console.log(result.stderr);
-	              });
-	            });
+	            exec(sshCmd, (e, stdout, stderr)=> {
+                    if (e instanceof Error) {
+                        console.error(e);
+                        throw e;
+                    }
+                    console.log('stdout ', stdout);
+                    console.log('stderr ', stderr);
+                });
 	        }
 	        resolve();	
 	    });
