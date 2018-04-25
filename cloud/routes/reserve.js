@@ -39,7 +39,6 @@ router.post('/', function(req ,res)
     console.log(startdate);
     let enddate=startdate+data.duration;
 
-
 /*
 0. Scheduling -- check computer
 0.5 Loadbalancing
@@ -54,6 +53,7 @@ router.post('/', function(req ,res)
   let computeip='159.89.234.84';
   let computeid;
   let mgmtip='159.89.234.84';
+  let mgmtpublicip;
   let mgmtid=1;
   let uid=req.session.uid;
   let computer;
@@ -106,7 +106,7 @@ router.post('/', function(req ,res)
 
       				for (var i = 0; i < imageport.length; i++) {
           				console.log(comrows[i]);
-          				portmap=" "+ comrows[i].comport + ":" + imageport[i].import;
+          				portmap=" -p "+ comrows[i].comport + ":" + imageport[i].import;
           				usedports.push({comport: comrows[i].comport, import: imageport[i].import ,natport:0 });
       				}
       				console.log(portmap);
@@ -118,6 +118,7 @@ router.post('/', function(req ,res)
 					con.query(computequery, function(err,comprows,fields){
 						if(err)  reject(err);
             mgmtip=comprows[0].private_ip;
+            mgmtpublicip=comprows[0].public_ip;
 						resolve(comprows);			
 					})
 			
@@ -131,7 +132,7 @@ router.post('/', function(req ,res)
                           privateKey: '/home/csc547/.ssh/id_rsa'
           						}).then( function() {
 
-            							let sshCmd = 'docker pull '+mgmtip+':5000/'+data.service+' && docker run -d -p '+ portmap +' '+mgmtip+':5000/'+data.service+':latest';
+            							let sshCmd = 'docker pull '+mgmtip+':5000/'+data.service+' && docker run -d '+ portmap +' '+mgmtip+':5000/'+data.service+':latest';
 
             							ssh.execCommand(sshCmd, { cwd:'/root' }).then(function(result) {
               								console.log(result.stdout);
@@ -207,9 +208,18 @@ router.post('/', function(req ,res)
           					//SSH and add IPtables rules
           					console.log("came here",usedports);
           					for (var i = 0; i < usedports.length; i++) {
-              					let sshCmd = 'iptables -t nat -A PREROUTING -d '+ mgmtip +' -p tcp --dport '+ usedports[i].natport +' -j DNAT --to-destination '+computer.private_ip+':'+usedports[i].comport;
+              					let sshCmd = 'iptables -t nat -A PREROUTING -d '+ mgmtpublicip +' -p tcp --dport '+ usedports[i].natport +' -j DNAT --to-destination '+computer.private_ip+':'+usedports[i].comport;
               					console.log(sshCmd);
-              					ssh.connect({
+
+                        exec(sshCmd, (e, stdout, stderr)=> {
+                            if (e instanceof Error) {
+                                console.error(e);
+                                throw e;
+                            }
+                            console.log('stdout ', stdout);
+                            console.log('stderr ', stderr);
+                        });
+/*              					ssh.connect({
             						host: 'localhost',
             						username: 'root'
           					}).then( function() {
@@ -218,7 +228,7 @@ router.post('/', function(req ,res)
                   						console.log("Added rules");
                   						console.log(result.stderr);
                 					});
-              					});
+              					});*/
           					}
           					resolve();
 
