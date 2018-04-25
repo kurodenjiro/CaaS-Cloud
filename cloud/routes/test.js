@@ -11,7 +11,7 @@ var scheduleObject = new schedule();
 ssh = new NODE_SSH();
 /* POST user signup. */
 var con = mysql.createConnection({
-  host: "152.14.112.129",
+  host: "localhost",
   user: "caas",
   password: "csc547",
   database: "csc547caas"
