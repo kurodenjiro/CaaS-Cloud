@@ -22,6 +22,24 @@ router.post('/', function(req ,res)
     console.log('This is reserve route');
     let data = req.body;
     console.log(data);
+
+    var dt = dateTime.create();
+    let startdate;
+    if(data.radiobutton==1){
+        startdate = dt.format('Y-m-d H:M:S');
+    }else{
+        let day = new Date();
+        day.setDate(getDate()+data.day);
+        day.setHours(data.hr);
+        day.setMinutes(data.min);
+        console.log("day",day);
+        startdate = dateTime.create(day.toLocaleString().slice(0,-3));
+    }
+//    let day = new Date();
+    console.log(startdate);
+    let enddate=startdate+data.duration;
+
+
 /*
 0. Scheduling -- check computer
 0.5 Loadbalancing
@@ -109,7 +127,8 @@ router.post('/', function(req ,res)
       						return new Promise(function(resolve, reject) {
           						ssh.connect({
             							host: computer.private_ip,
-            							username: 'root'
+            							username: 'root',
+                          privateKey: '/home/csc547/.ssh/id_rsa'
           						}).then( function() {
 
             							let sshCmd = 'docker pull '+mgmtip+':5000/'+data.service+' && docker run -d -p '+ portmap +' '+mgmtip+':5000/'+data.service+':latest';
@@ -127,9 +146,9 @@ router.post('/', function(req ,res)
       				console.log(result, "conhash");
       					//6. If it works properly -- insert first 12 character of hash in DB
       				conhash = result;
-				var dt = dateTime.create();
-				var formatted = dt.format('YYYY-mm-dd HH:MM:SS');
-      				let containerquery = "INSERT INTO container(conhash,comid,uid,imid,profile,res_start_time,res_end_time,creation_time,modified_time,state) VALUES('"+result.substring(0,11)+"', "+computeid+","+uid+","+imid+","+data.profile+",'"+data.start+"','"+data.end+"', '"+formatted+"', null, 'available')";
+				//var dt = dateTime.create();
+				//var formatted = dt.format('YYYY-mm-dd HH:MM:SS');
+      				let containerquery = "INSERT INTO container(conhash,comid,uid,imid,profile,res_start_time,res_end_time,creation_time,modified_time,state) VALUES('"+result.substring(0,11)+"', "+computeid+","+uid+","+imid+","+data.profile+",'"+startdate+"','"+enddate+"', NOW(), null, 'available')";
       				// console.log(rows);
       				return new Promise(function(resolve, reject) {
 						console.log(containerquery);
