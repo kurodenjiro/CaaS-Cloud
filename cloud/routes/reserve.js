@@ -5,7 +5,7 @@ var main = require('../app');
 var NODE_SSH = require('node-ssh');
 var schedule = require('../schedule');
 var dateTime = require('node-datetime');
-
+const exec = require('child_process').exec;
 var scheduleObject = new schedule();
 
 ssh = new NODE_SSH();
@@ -22,6 +22,23 @@ router.post('/', function(req ,res)
     console.log('This is reserve route');
     let data = req.body;
     console.log(data);
+
+    var dt = dateTime.create();
+    let startdate;
+    if(data.radiobutton==1){
+        startdate = dt.format('Y-m-d H:M:S');
+    }else{
+        let day = new Date();
+        day.setDate(getDate()+data.day);
+        day.setHours(data.hr);
+        day.setMinutes(data.min);
+        console.log("day",day);
+        startdate = dateTime.create(day.toLocaleString().slice(0,-3));
+    }
+//    let day = new Date();
+    console.log(startdate);
+    let enddate=startdate+data.duration;
+
 /*
 0. Scheduling -- check computer
 0.5 Loadbalancing
@@ -33,9 +50,10 @@ router.post('/', function(req ,res)
   let usedports = [];
   let imid = 0;
   let conid=0;
-  let computeip='159.89.234.84';
+  let computeip;
   let computeid;
-  let mgmtip='159.89.234.84';
+  let mgmtip;
+  let mgmtpublicip;
   let mgmtid=1;
   let uid=req.session.uid;
   let computer;
@@ -85,7 +103,7 @@ router.post('/', function(req ,res)
 
       				for (var i = 0; i < imageport.length; i++) {
           				console.log(comrows[i]);
-          				portmap=" "+ comrows[i].comport + ":" + imageport[i].import;
+          				portmap=" -p "+ comrows[i].comport + ":" + imageport[i].import;
           				usedports.push({comport: comrows[i].comport, import: imageport[i].import ,natport:0 });
       				}
       				console.log(portmap);
@@ -95,11 +113,13 @@ router.post('/', function(req ,res)
 				return new Promise(function(resolve,reject){
 					con.query(computequery, function(err,comprows,fields){
 						if(err)  reject(err);
-            mgmtip=comprows[0].private_ip;
-						computer=comprows[1];
+            			mgmtip=comprows[0].private_ip;
+            			mgmtpublicip=comprows[0].public_ip;
+				computer = comprows[1];
 						resolve();
 					})
-				}).then(function(result){
+
+				}).then(function(){
 				console.log("insert container");
 
                                 var dt = dateTime.create();
@@ -126,7 +146,7 @@ router.post('/', function(req ,res)
                                                 con.query(getconidquery, function(err, idrows, fields){
                                                                                         if (err) reject(err);
                                                                                         //console.log(comrows, "hello")
-;
+
                                                                                         // return comrows;
                                                                                         //if(err) console.log(err);
                                                                                         console.log(idrows[0].conid);
@@ -139,16 +159,17 @@ router.post('/', function(req ,res)
       						return new Promise(function(resolve, reject) {
           						ssh.connect({
             							host: computer.private_ip,
-            							username: 'root'
+            							username: 'root',
+                          privateKey: '/home/csc547/.ssh/id_rsa'
           						}).then( function() {
 								let sshCmd = NULL;
 								if(profile == 2)
 								{
-									sshCmd = 'mkdir /local'+conid+'; docker-machine ssh storage mkdir /remote'+conid+'; eval $(docker-machine env storage); docker pull '+mgmtip+':5000/'+data.service+' && docker run -d -p '+ portmap +' -v /local'+conid+':/root/'+conid+' '+mgmtip+':5000/'+data.service+':latest';
+									sshCmd = 'mkdir /local'+conid+'; docker-machine ssh storage mkdir /remote'+conid+'; eval $(docker-machine env storage); docker pull '+mgmtip+':5000/'+data.service+' && docker run -d '+ portmap +' -v /local'+conid+':/root/'+conid+' '+mgmtip+':5000/'+data.service+':latest';
 								}
 								else
 								{
-            								sshCmd = 'docker pull '+mgmtip+':5000/'+data.service+' && docker run -d -p '+ portmap +' '+mgmtip+':5000/'+data.service+':latest';
+            								sshCmd = 'docker pull '+mgmtip+':5000/'+data.service+' && docker run -d '+ portmap +' '+mgmtip+':5000/'+data.service+':latest';
 								}
             							ssh.execCommand(sshCmd, { cwd:'/root' }).then(function(result) {
               								console.log(result.stdout);
@@ -227,18 +248,17 @@ router.post('/', function(req ,res)
           					//SSH and add IPtables rules
           					console.log("came here",usedports);
           					for (var i = 0; i < usedports.length; i++) {
-              					let sshCmd = 'iptables -t nat -A PREROUTING -d '+ mgmtip +' -p tcp --dport '+ usedports[i].natport +' -j DNAT --to-destination '+computer.private_ip+':'+usedports[i].comport;
+              					let sshCmd = 'iptables -t nat -A PREROUTING -d '+ mgmtpublicip +' -p tcp --dport '+ usedports[i].natport +' -j DNAT --to-destination '+computer.private_ip+':'+usedports[i].comport;
               					console.log(sshCmd);
-              					ssh.connect({
-            						host: 'localhost',
-            						username: 'root'
-          					}).then( function() {
 
-                					ssh.execCommand(sshCmd, { cwd:'/root' }).then(function(result) {
-                  						console.log("Added rules");
-                  						console.log(result.stderr);
-                					});
-              					});
+                        exec(sshCmd, (e, stdout, stderr)=> {
+                            if (e instanceof Error) {
+                                console.error(e);
+                                throw e;
+                            }
+                            console.log('stdout ', stdout);
+                            console.log('stderr ', stderr);
+                        });
           					}
           					resolve();
 
