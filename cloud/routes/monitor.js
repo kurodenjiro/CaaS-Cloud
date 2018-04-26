@@ -81,7 +81,8 @@ router.get('/', function(req, res) {
                             console.log('Inside promise');
                             ssh.connect({
                                 host: conhashrows[j].private_ip,
-                                username: 'root'
+                                username: 'root',
+                                privateKey: '/home/csc547/.ssh/id_rsa'
                             }).then(async function() {
                                 console.log('Connected')
                                 await sleep(250);

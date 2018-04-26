@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var mysql = require('mysql')
 var main = require('../app');
+const exec = require('child_process').exec;
 
 var con = mysql.createConnection({
   host: "localhost",
@@ -70,7 +71,8 @@ router.post('/', function(req, res) {
 	    return new Promise(function(resolve, reject) {
 	    	ssh.connect({
                 host: compute_ip,
-	            username: 'root'
+	            username: 'root',
+                privateKey: '/home/csc547/.ssh/id_rsa'
 	        }).then( function() {
 	            let sshCmd = 'docker stop '+ conhash +' && sleep 30s &&  docker rm '+ conhash;
 	            ssh.execCommand(sshCmd, { cwd:'/root' }).then(function(result) {

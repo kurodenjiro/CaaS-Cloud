@@ -5,7 +5,7 @@ var mysql = require('mysql')
 
 var con = mysql.createConnection({
   host: "localhost",
-  user: "pavi",
+  user: "caas",
   password: "csc547",
   database: "csc547caas"
 });
@@ -15,7 +15,7 @@ var con = mysql.createConnection({
 router.get('/', function(req, res, next) {
   console.log('This is my admin dashboard');
   let containerQuery = "SELECT comid, res_start_time, res_end_time, imid, state from container";
-  let computerQuery = "SELECT comid,public_ip, private_ip, total_ram, os, total_cores,state, ssh_key_path from computer ";
+  let computerQuery = "SELECT comid, private_ip, total_ram, os, total_cores,state from computer ";
 
   let p1 = new Promise(function(resolve, reject) {
     con.query(computerQuery, function(err, rows, fields){
