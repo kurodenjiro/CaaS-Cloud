@@ -12,7 +12,7 @@ ssh = new NODE_SSH();
 /* POST user signup. */
 var con = mysql.createConnection({
   host: "localhost",
-  user: "pavi",
+  user: "caas",
   password: "csc547",
   database: "csc547caas"
 });
@@ -55,7 +55,7 @@ router.post('/', function(req ,res)
   let mgmtip;
   let mgmtpublicip;
   let mgmtid=1;
-  let uid=req.session.uid;
+  let uid=1;
   let computer;
 //1. image id,ports from DB
 
@@ -124,7 +124,7 @@ router.post('/', function(req ,res)
 
                                 var dt = dateTime.create();
                                 var formatted = dt.format('YYYY-mm-dd HH:MM:SS');
-                                let containerquery = "INSERT INTO container(comid,uid,imid,profile,res_start_time,res_end_time,creation_time,modified_time,state) VALUES("+computeid+","+uid+","+imid+","+data.profile+",'"+data.start+"','"+data.end+"', '"+formatted+"', null, 'reserved')";
+                                let containerquery = "INSERT INTO container(comid,uid,imid,profile,res_start_time,res_end_time,creation_time,modified_time,state) VALUES("+computeid+","+uid+","+imid+","+data.profile+",'"+startdate+"','"+enddate+"', NOW(), null, 'available')";
                                 // console.log(rows);
                                 return new Promise(function(resolve, reject) {
                                                 console.log(containerquery);
@@ -156,6 +156,7 @@ router.post('/', function(req ,res)
                                 })
                 },errHandler).then(function(){
 				console.log("inside docker queries");
+
       						return new Promise(function(resolve, reject) {
           						ssh.connect({
             							host: computer.private_ip,
@@ -176,7 +177,7 @@ router.post('/', function(req ,res)
              							 	resolve(result.stdout)
             							});
           						});
-      						})
+      						})*/
 					})
 
   		},errHandler).then(function(result){
@@ -184,8 +185,8 @@ router.post('/', function(req ,res)
                                 //result='abcshhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh8888';
                                 console.log(result, "conhash");
                                         //6. If it works properly -- insert first 12 character of hash in DB
-                                conhash = result;
-                                let containerquery = "update container set conhash = '"+conhash.substring(0,11)+"',state = 'available' where conid ="+conid+";";
+                                conhash = result.split("\n");
+                                let containerquery = "update container set conhash = '"+conhash[conhash.length -1].substring(0,11)+"',state = 'available' where conid ="+conid+";";
                                 // console.log(rows);
                                 return new Promise(function(resolve, reject) {
                                                 console.log(containerquery);
@@ -194,7 +195,6 @@ router.post('/', function(req ,res)
                                                         //console.log(comrows, "hello");
                                                         // return comrows;
                                                         if(err) console.log(err);
-
                                                         resolve();
                                                 })
                                 })
@@ -214,7 +214,6 @@ router.post('/', function(req ,res)
                                                 })
                                 })
 		}
-		resolve();
                 },errHandler).then(function(){
 				console.log("inside nat ports");
       					console.log("Available nat ports");
