@@ -19,6 +19,7 @@ var con = mysql.createConnection({
 
 router.post('/', function(req ,res) 
 {
+console.log("Starting now..............",dateTime.create().format('Y-m-d H:M:S'));
     console.log('This is reserve route');
     let data = req.body;
     console.log(data);
@@ -239,6 +240,7 @@ router.post('/', function(req ,res)
       				})
   		},errHandler).then(function(){
       				console.log("W completed");
+console.log("Ending now..............",dateTime.create().format('Y-m-d H:M:S'));
       				res.ren
   				},errHandler);
 
