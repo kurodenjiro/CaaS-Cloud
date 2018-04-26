@@ -28,13 +28,11 @@ This is compute node information
 <br><br>
 {{#each Allcompute as |node|}}
     Computer ID: {{node.comid}}
-    Public IP: {{node.public_ip}}
     Private IP: {{node.private_ip}}
     RAM : {{node.total_ram}}
     OS : {{node.os}}
     Cores: {{node.total_cores}}
     State: {{node.state}}
-    SSH path: {{node.ssh_key_path}}
     <hr>
 {{/each}}
 </body>
