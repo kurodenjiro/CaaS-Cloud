@@ -50,9 +50,9 @@ router.post('/', function(req ,res)
   let usedports = [];
   let imid = 0;
   let conid=0;
-  let computeip='159.89.234.84';
+  let computeip;
   let computeid;
-  let mgmtip='159.89.234.84';
+  let mgmtip;
   let mgmtpublicip;
   let mgmtid=1;
   let uid=req.session.uid;
@@ -68,10 +68,10 @@ router.post('/', function(req ,res)
 		console.log("insideschedulecall");
 		computeid=value;
 		console.log("haha"+computeid);
-	
 
   	return new Promise(function(resolve, reject) 
 	{
+		console.log("image query");
       		con.connect(function(err) {
           		let imquery = "SELECT import,images.imid from images,image_ports WHERE images.imid = image_ports.imid AND images.tag = '"+ data.service+"'";
 
@@ -86,8 +86,6 @@ router.post('/', function(req ,res)
       			// console.log(r);
       			imageport = rows;
       			imid = rows[0].imid;
-	
-	
 			console.log("hostid:"+computeid);
       			let comportquery = "select comport from computer_ports where comid="+computeid+" AND comport NOT IN ( select comport from container_ports where comid="+computeid+")";
        			//console.log(rows);
@@ -101,7 +99,6 @@ router.post('/', function(req ,res)
       	  		})
 	},errHandler).then(function(comrows){
 				console.log("resolve:computer ports:"+comrows);
-      				
       				//3. foreach import map with available port --- map string
 
       				for (var i = 0; i < imageport.length; i++) {
@@ -112,71 +109,113 @@ router.post('/', function(req ,res)
       				console.log(portmap);
       				//4. ssh and do docker pull
       				//5. ssh and do docker run on compute --- get container hash
-	
 				let computequery="select * from  computer where comid="+computeid+" OR comid="+mgmtid+" ORDER BY comid"; 
 				return new Promise(function(resolve,reject){
 					con.query(computequery, function(err,comprows,fields){
 						if(err)  reject(err);
-            mgmtip=comprows[0].private_ip;
-            mgmtpublicip=comprows[0].public_ip;
-						resolve(comprows);			
+            			mgmtip=comprows[0].private_ip;
+            			mgmtpublicip=comprows[0].public_ip;
+				computer = comprows[1];
+						resolve();
 					})
-			
-				}).then(function(comprows){
-						computer=comprows[1];
-						
+
+				}).then(function(){
+				console.log("insert container");
+
+                                var dt = dateTime.create();
+                                var formatted = dt.format('YYYY-mm-dd HH:MM:SS');
+                                let containerquery = "INSERT INTO container(comid,uid,imid,profile,res_start_time,res_end_time,creation_time,modified_time,state) VALUES("+computeid+","+uid+","+imid+","+data.profile+",'"+startdate+"','"+enddate+"', NOW(), null, 'available')";
+                                // console.log(rows);
+                                return new Promise(function(resolve, reject) {
+                                                console.log(containerquery);
+                                                con.query(containerquery, function(err, controws, fields){
+                                                        if (err) reject(err);
+                                                        //console.log(comrows, "hello");
+                                                        // return comrows;
+                                                        if(err) console.log(err);
+
+                                                        resolve();
+                                                })
+                                })
+
+                },errHandler).then(function(){
+				console.log("select container");
+                                let getconidquery = "SELECT conid from container ORDER BY conid desc LIMIT 1";
+                                // console.log(rows);
+                                return new Promise(function(resolve, reject) {
+                                                con.query(getconidquery, function(err, idrows, fields){
+                                                                                        if (err) reject(err);
+                                                                                        //console.log(comrows, "hello")
+
+                                                                                        // return comrows;
+                                                                                        //if(err) console.log(err);
+                                                                                        console.log(idrows[0].conid);
+                                                                                        conid=idrows[0].conid;
+                                                                                        resolve();
+                                                        })
+                                })
+                },errHandler).then(function(){
+				console.log("inside docker queries");
+
       						return new Promise(function(resolve, reject) {
           						ssh.connect({
             							host: computer.private_ip,
             							username: 'root',
                           privateKey: '/home/csc547/.ssh/id_rsa'
           						}).then( function() {
-
-            							let sshCmd = 'docker pull '+mgmtip+':5000/'+data.service+' && docker run -d '+ portmap +' '+mgmtip+':5000/'+data.service+':latest';
-
+								let sshCmd = NULL;
+								if(data.profile == 2)
+								{
+									sshCmd = 'mkdir /local'+conid+'; docker-machine ssh storage mkdir /remote'+conid+'; eval $(docker-machine env storage); docker pull '+mgmtip+':5000/'+data.service+' && docker run -d '+ portmap +' -v /local'+conid+':/root/'+conid+' '+mgmtip+':5000/'+data.service+':latest';
+								}
+								else
+								{
+            								sshCmd = 'docker pull '+mgmtip+':5000/'+data.service+' && docker run -d '+ portmap +' '+mgmtip+':5000/'+data.service+':latest';
+								}
             							ssh.execCommand(sshCmd, { cwd:'/root' }).then(function(result) {
               								console.log(result.stdout);
              							 	resolve(result.stdout)
             							});
           						});
-      						})
+      						})*/
 					})
 
   		},errHandler).then(function(result){
-				//result='abcshhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh8888';
-      				console.log(result, "conhash");
-      					//6. If it works properly -- insert first 12 character of hash in DB
-      				conhash = result.split("\n");
+				console.log("update container");
+                                //result='abcshhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh8888';
+                                console.log(result, "conhash");
+                                        //6. If it works properly -- insert first 12 character of hash in DB
+                                conhash = result.split("\n");
+                                let containerquery = "update container set conhash = '"+conhash[conhash.length -1].substring(0,11)+"',state = 'available' where conid ="+conid+";";
+                                // console.log(rows);
+                                return new Promise(function(resolve, reject) {
+                                                console.log(containerquery);
+                                                con.query(containerquery, function(err, controws, fields){
+                                                        if (err) reject(err);
+                                                        //console.log(comrows, "hello");
+                                                        // return comrows;
+                                                        if(err) console.log(err);
+                                                        resolve();
+                                                })
+                                })
 
-      				let containerquery = "INSERT INTO container(conhash,comid,uid,imid,profile,res_start_time,res_end_time,creation_time,modified_time,state) VALUES('"+conhash[conhash.length -1].substring(0,11)+"', "+computeid+","+uid+","+imid+","+data.profile+",'"+startdate+"','"+enddate+"', NOW(), null, 'available')";
-      				// console.log(rows);
-      				return new Promise(function(resolve, reject) {
-						console.log(containerquery);
-        					con.query(containerquery, function(err, controws, fields){
-          						if (err) reject(err);
-          						//console.log(comrows, "hello");
-          						// return comrows;
-          						if(err) console.log(err);
+                },errHandler).then(function(result){
+			console.log("inside storage query");
+		if(data.profile == 2)
+		{
+                   let storagequery = "insert into storage values("+conid+",'/root/local"+conid+"','/root/remote"+conid+"')";
+                                return new Promise(function(resolve, reject) {
+                                                console.log(storagequery);
+                                                con.query(storagequery, function(err, storagerows, fields){
+                                                        if (err) reject(err);
+                                                        if(err) console.log(err);
 
-          						resolve();
-        					})
-      				})
-
-  		},errHandler).then(function(){
-      				let getconidquery = "SELECT conid from container ORDER BY conid desc LIMIT 1";
-      				// console.log(rows);
-      				return new Promise(function(resolve, reject) {
-        					con.query(getconidquery, function(err, idrows, fields){
-          										if (err) reject(err);
-          										//console.log(comrows, "hello");
-          										// return comrows;
-          										//if(err) console.log(err);
-          										console.log(idrows[0].conid);
-          										conid=idrows[0].conid;
-          										resolve();
-        						})
-      				})
-  		},errHandler).then(function(){
+                                                        resolve();
+                                                })
+                                })
+		}
+                },errHandler).then(function(){
+				console.log("inside nat ports");
       					console.log("Available nat ports");
 
       					let natquery = "select natport from nat_ports where comid="+mgmtid+" AND natport NOT IN ( select natport from container_ports)";
@@ -191,6 +230,7 @@ router.post('/', function(req ,res)
 
 
   		},errHandler).then(function(natrows){
+			console.log("update ip tables");
       					return new Promise(function(resolve, reject) {
           					//SSH and add IPtables rules
           					console.log("came here",usedports);
@@ -224,7 +264,7 @@ router.post('/', function(req ,res)
       				});
 
   		},errHandler).then(function(){
-
+				console.log("insert container ports");
       				return new Promise(function(resolve,reject){
 
           			for( var i=0; i < usedports.length; i++){
