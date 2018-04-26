@@ -164,7 +164,7 @@ router.post('/', function(req ,res)
                           privateKey: '/home/csc547/.ssh/id_rsa'
           						}).then( function() {
 								let sshCmd = NULL;
-								if(profile == 2)
+								if(data.profile == 2)
 								{
 									sshCmd = 'mkdir /local'+conid+'; docker-machine ssh storage mkdir /remote'+conid+'; eval $(docker-machine env storage); docker pull '+mgmtip+':5000/'+data.service+' && docker run -d '+ portmap +' -v /local'+conid+':/root/'+conid+' '+mgmtip+':5000/'+data.service+':latest';
 								}
