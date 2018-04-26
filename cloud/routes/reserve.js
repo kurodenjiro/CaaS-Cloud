@@ -55,7 +55,7 @@ router.post('/', function(req ,res)
   let mgmtip;
   let mgmtpublicip;
   let mgmtid=1;
-  let uid=1;
+  let uid=req.session.uid;
   let computer;
 //1. image id,ports from DB
 
