@@ -164,13 +164,16 @@ console.log("Starting now..............",dateTime.create().format('Y-m-d H:M:S')
             							username: 'root',
                           privateKey: '/home/csc547/.ssh/id_rsa'
           						}).then( function() {
-								let sshCmd = NULL;
+								let sshCmd;
 								if(data.profile == 2)
 								{
-									sshCmd = 'mkdir /local'+conid+'; docker-machine ssh storage mkdir /remote'+conid+'; eval $(docker-machine env storage); docker pull '+mgmtip+':5000/'+data.service+' && docker run -d '+ portmap +' -v /local'+conid+':/root/'+conid+' '+mgmtip+':5000/'+data.service+':latest';
+									console.log("with storage");
+									sshCmd = 'mkdir /root/files/local'+conid+'; docker-machine ssh dev mkdir files/remote'+conid+'; docker-machine mount dev:files/remote'+conid+' /root/files/local'+conid+'; eval $(docker-machine env dev); docker pull '+mgmtip+':5000/'+data.service+' && docker run -d '+ portmap +' -v /root/files/local'+conid+':/root/'+conid+' '+mgmtip+':5000/'+data.service+':latest';
+									console.log(sshCmd);
 								}
 								else
 								{
+									console.log("without storage");
             								sshCmd = 'docker pull '+mgmtip+':5000/'+data.service+' && docker run -d '+ portmap +' '+mgmtip+':5000/'+data.service+':latest';
 								}
             							ssh.execCommand(sshCmd, { cwd:'/root' }).then(function(result) {
@@ -178,7 +181,7 @@ console.log("Starting now..............",dateTime.create().format('Y-m-d H:M:S')
              							 	resolve(result.stdout)
             							});
           						});
-      						})*/
+      						})
 					})
 
   		},errHandler).then(function(result){
@@ -248,7 +251,7 @@ console.log("Starting now..............",dateTime.create().format('Y-m-d H:M:S')
           					//SSH and add IPtables rules
           					console.log("came here",usedports);
           					for (var i = 0; i < usedports.length; i++) {
-              					let sshCmd = 'iptables -t nat -A PREROUTING -d '+ mgmtpublicip +' -p tcp --dport '+ usedports[i].natport +' -j DNAT --to-destination '+computer.private_ip+':'+usedports[i].comport;
+              					let sshCmd = 'sudo iptables -t nat -I PREROUTING -d '+ mgmtpublicip +'/24 -p tcp --dport '+ usedports[i].natport +' -j DNAT --to-destination '+computer.private_ip+':'+usedports[i].comport;
               					console.log(sshCmd);
 
                         exec(sshCmd, (e, stdout, stderr)=> {
