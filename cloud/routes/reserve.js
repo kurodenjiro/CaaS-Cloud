@@ -167,10 +167,16 @@ console.log("Starting now..............",dateTime.create().format('Y-m-d H:M:S')
 								let sshCmd;
 								if(data.profile == 2)
 								{
-									console.log("with storage");
-									sshCmd = 'mkdir /root/files/local'+conid+'; docker-machine ssh dev mkdir files/remote'+conid+'; docker-machine mount dev:files/remote'+conid+' /root/files/local'+conid+'; eval $(docker-machine env dev); docker pull '+mgmtip+':5000/'+data.service+' && docker run -d '+ portmap +' -v /root/files/local'+conid+':/root/'+conid+' '+mgmtip+':5000/'+data.service+':latest';
+									console.log("with remote storage");
+									sshCmd = 'mkdir /root/files/local'+conid+'; docker-machine ssh dev mkdir /root/files/remote'+conid+'; docker-machine mount dev:/root/files/remote'+conid+' /root/files/local'+conid+'; eval $(docker-machine env dev); docker pull '+mgmtip+':5000/'+data.service+' && docker run -d '+ portmap +' -v /root/files/local'+conid+':/tmp/'+conid+' '+mgmtip+':5000/'+data.service+':latest';
 									console.log(sshCmd);
 								}
+								else if(data.profile == 1)
+                                                                {
+                                                                        console.log("with local storage");
+                                                                        sshCmd = 'mkdir /root/files/local'+conid+'; docker pull '+mgmtip+':5000/'+data.service+' && docker run -d '+ portmap +' -v /root/files/local'+conid+':/tmp/'+conid+' '+mgmtip+':5000/'+data.service+':latest';
+                                                                        console.log(sshCmd);
+                                                                }
 								else
 								{
 									console.log("without storage");
@@ -205,10 +211,18 @@ console.log("Starting now..............",dateTime.create().format('Y-m-d H:M:S')
 
                 },errHandler).then(function(result){
 			console.log("inside storage query");
-		if(data.profile == 2)
+		if(data.profile != 3)
 		{
-                   let storagequery = "insert into storage values("+conid+",'/root/local"+conid+"','/root/remote"+conid+"')";
-                                return new Promise(function(resolve, reject) {
+			let storagequery;
+			if(data.profile == 2)
+			{
+                   	 storagequery = "insert into storage values("+conid+",'/root/files/local"+conid+"','/root/files/remote"+conid+"')";
+                        }
+			else
+			{
+			storagequery = "insert into storage values("+conid+",'/root/files/local"+conid+"', null)";
+			}
+			        return new Promise(function(resolve, reject) {
                                                 console.log(storagequery);
                                                 con.query(storagequery, function(err, storagerows, fields){
                                                         if (err) reject(err);

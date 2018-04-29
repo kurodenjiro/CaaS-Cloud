@@ -17,7 +17,8 @@ router.post('/', function(req, res) {
 
     let mgmtid=1;
     let compute_ip;
-
+    let localpath;
+    let remotepath;
 
 	var errHandler = function(err) {
 	  	console.log(err);
@@ -57,9 +58,22 @@ router.post('/', function(req, res) {
                     console.log('stderr ', stderr);
                 });
 	        }
-	        resolve();	
+	        resolve();
 	    });
 	},errHandler).then(function(){
+                let storagequery =  "select * from storage WHERE conid="+req.body.conid;
+            return new Promise(function(resolve,reject){
+                    con.query(storagequery,function(err,storagerow,fields){
+                        if(err) reject(err);
+			if(storagerow[0].remote_path)
+			{
+				localpath = storagerow[0].local_path;
+				remotepath = storagerow[0].remote_path;
+			}
+                        resolve();
+                    })
+            })
+        },errHandler).then(function(){
 		let conhashquery =  "select conhash from container WHERE conid="+req.body.conid;
 	    return new Promise(function(resolve,reject){
 		    con.query(conhashquery,function(err,conhashrow,fields){
@@ -74,7 +88,12 @@ router.post('/', function(req, res) {
 	            username: 'root',
                 privateKey: '/home/csc547/.ssh/id_rsa'
 	        }).then( function() {
-	            let sshCmd = 'docker stop '+ conhash +' && sleep 30s &&  docker rm '+ conhash;
+		let sshCmd;
+	            sshCmd = 'docker stop '+ conhash +' && sleep 30s &&  docker rm '+ conhash;
+			if(remotepath)
+                	{
+                        	sshCmd += '; docker-machine mount -u dev:'+remotepath+' '+localpath+'; rmdir '+localpath;
+                	}
 	            ssh.execCommand(sshCmd, { cwd:'/root' }).then(function(result) {
 	              console.log(result.stdout);
 	              resolve();
