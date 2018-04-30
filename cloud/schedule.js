@@ -4,13 +4,10 @@ var mysql = require('mysql')
 
 class Schedule {
 	constructor() {
-	
 
-	
-this.create_schedule = function (con, data) 
+this.create_schedule = function (con, data, startdate, enddate) 
 {
 	console.log('schedule:This is reserve route');
-    	
 	let image_details;
 	let hosts;
     	console.log(data);
@@ -20,13 +17,7 @@ this.create_schedule = function (con, data)
 
     	return new Promise(function(resolve,reject)
 	{
-		console.log("beforeconn")
-		
-			console.log("beforeerror");
-        		
-			console.log("aftererror");
         		var service = data.service
-        	
         		console.log(data.service+"qwerrty")
         		con.query("SELECT os,ram,cores FROM images WHERE images.tag = '"+service+"';",function (err, result, fields)
 			{
@@ -41,19 +32,18 @@ this.create_schedule = function (con, data)
 					resolve(result);
 				}
 			});
-		
 	}).then(function(result)
 	{
 		image_details = result[0];
 		var os = result[0].os
 		console.log("os:"+os);
-		var conquery = "Select comid, (select sum(im.ram) from container con join images im on con.imid = im.imid where comid = com.comid and '"+data.start+"' < con.res_end_time and '"+ data.end+"' > con.res_start_time) as used_ram, (select sum(im.cores) from container con join images im on con.imid = im.imid where comid = com.comid and '"+ data.start+"' < con.res_end_time and '"+ data.end+"' > con.res_start_time) as used_cores, com.total_ram, com.total_cores from computer com where os = '"+os+"';";
+		var conquery = "Select comid, (select sum(im.ram) from container con join images im on con.imid = im.imid where comid = com.comid and '"+startdate+"' < con.res_end_time and '"+ enddate+"' > con.res_start_time) as used_ram, (select sum(im.cores) from container con join images im on con.imid = im.imid where comid = com.comid and '"+ startdate+"' < con.res_end_time and '"+ enddate+"' > con.res_start_time) as used_cores, com.total_ram, com.total_cores from computer com where os = '"+os+"';";
 		return new Promise(function(resolve,reject)
 		{
 			console.log("forhost quesry:"+conquery)
 			con.query(conquery,function(err,result1,fields)
-			{		
-				console.log("inside host query")	
+			{
+				console.log("inside host query");
 				if (err) throw err;
 				console.log(result1);
 				if(!result1)
@@ -71,29 +61,29 @@ this.create_schedule = function (con, data)
 		var ramratio= 1, chosen_host=null;
 		hosts=result1;
 		var i;
-		for(i=0;i<hosts.length;i++)					
+		for(i=0;i<hosts.length;i++)
 		{
-			var host = hosts[i]; 
+			var host = hosts[i];
 			console.log(host);
 			if(host.comid==1)
 				continue;
 			if(!host.used_ram || !host.used_cores)
 			{
 				chosen_host=host.comid;
-				break;						
+				console.log("idle host:"+chosen_host);
+				break;
 			}
 			if(host.total_ram - host.used_ram >= image_details.ram && host.total_cores - host.used_cores >= image_details.cores)
 			{
 				if(host.used_ram/host.total_ram < ramratio)
 				{
-					console.log("newhost");
+					console.log("newhost"+comid);
 					ramratio=host.used_ram/host.total_ram;
+					console.log("ramratio:"+ramratio);
  					chosen_host=host.comid;
 				}
 			}
 		}
-							
-							
 		if(!chosen_host)
 		{
 			console.log('not enough resources on any host');
@@ -102,13 +92,11 @@ this.create_schedule = function (con, data)
 		{
 			console.log("qwerty"+chosen_host);
 			return new Promise(function(resolve,reject){
-				
 				resolve(chosen_host);
 			});
-		}						
-		
+		}
 	});
-								
+
     // Insert the data into database and spinup the container.
 
 }
