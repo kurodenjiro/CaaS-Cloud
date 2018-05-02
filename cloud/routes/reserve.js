@@ -65,7 +65,7 @@ console.log("Starting now..............",dateTime.create().format('Y-m-d H:M:S')
     		console.log(err);
   	}
 
-	scheduleObject.create_schedule(con, data).then(function(value){
+	scheduleObject.create_schedule(con, data, startdate, enddate).then(function(value){
 		console.log("insideschedulecall");
 		computeid=value;
 		console.log("haha"+computeid);

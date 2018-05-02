@@ -65,7 +65,7 @@ router.post('/', function(req, res) {
             return new Promise(function(resolve,reject){
                     con.query(storagequery,function(err,storagerow,fields){
                         if(err) reject(err);
-			if(storagerow[0].remote_path)
+			if(storagerow && storagerow[0] && storagerow[0].remote_path)
 			{
 				localpath = storagerow[0].local_path;
 				remotepath = storagerow[0].remote_path;
@@ -94,6 +94,7 @@ router.post('/', function(req, res) {
                 	{
                         	sshCmd += '; docker-machine mount -u dev:'+remotepath+' '+localpath+'; rmdir '+localpath;
                 	}
+			console.log(sshCmd);
 	            ssh.execCommand(sshCmd, { cwd:'/root' }).then(function(result) {
 	              console.log(result.stdout);
 	              resolve();
