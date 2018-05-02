@@ -15,6 +15,7 @@ var loginRouter = require('./routes/login');
 var admindashboardRouter = require('./routes/admindashboard');
 var monitorRouter = require('./routes/monitor');
 var billing = require('./routes/billing');
+var logout = require('./routes/logout');
 
 var app = express();
 
@@ -46,6 +47,7 @@ app.use('/admindashboard', admindashboardRouter);
 app.use('/reservepage', reservepageRouter);
 app.use('/myreservationspage', getReservations);
 app.use('/billing', billing);
+app.use('/logout', logout);
 
 app.use('/reserve', reserveRouter);
 app.use('/monitor', monitorRouter);

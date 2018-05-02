@@ -298,7 +298,7 @@ console.log("Starting now..............",dateTime.create().format('Y-m-d H:M:S')
   		},errHandler).then(function(){
       				console.log("W completed");
 console.log("Ending now..............",dateTime.create().format('Y-m-d H:M:S'));
-      				res.ren
+      				res.render('myreservationspage');
   				},errHandler);
 
 /*

@@ -3,11 +3,11 @@
 <link rel='stylesheet' href='/stylesheets/dashboard.css' />
 
 <style>
-/*table, th, td {
+table, th, td {
     border: 1px solid black;
     border-collapse: collapse;
 }
-*/th, td {
+th, td {
     padding: 5px;
     text-align: left;    
 }
@@ -18,18 +18,20 @@
   <a href="/reservepage">Create Reservation</a>
   <a href="/myreservationspage">My Reservations</a>
   <a href="/billing">My Billing Dashboard</a>
+  <a href="/logout">Logout</a>
 </div>
 
 <table style="width:100%">
   <tr>
     <th>Image</th>
     <th>Creation Time</th> 
-    <th></th>
+    <th>Connection String</th>
   </tr>
 {{#each Allcontainer as |container|}}
   <tr>
     <td>{{container.name}}</td>
-    <td>{{container.time}}</td> 
+    <td>{{container.time}}</td>
+    <td>{{container.constring}}</td>
    	<td>
   			<form method="POST" action="/deleteReservation" id="signup">
   			  <input type="hidden" name="imagetag" value="{{container.name}}">
