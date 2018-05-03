@@ -11,7 +11,7 @@ var signupRouter = require('./routes/signup');
 var reservepageRouter = require('./routes/reservepage');
 var reserveRouter = require('./routes/reserve');
 var deleteReservation = require('./routes/deleteReservation');
-var logoutRouter = require('./routes/userlogout');
+//var logoutRouter = require('./routes/userlogout');
 var loginRouter = require('./routes/login');
 var admindashboardRouter = require('./routes/admindashboard');
 var monitorRouter = require('./routes/monitor');
@@ -40,7 +40,7 @@ app.use('/', indexRouter);
 app.use('/signup', signupRouter);
 app.use('/deleteReservation', deleteReservation);
 app.use('/login', loginRouter);
-app.use('/userlogout',logoutRouter);
+//app.use('/userlogout',logoutRouter);
 app.get('/dashboard', function(req, res) {
     console.log('THis is nice dashboard');
     res.render('dashboard');

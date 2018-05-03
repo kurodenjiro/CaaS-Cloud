@@ -38,6 +38,24 @@ socket.on('msg', function(...args) {
 
 })
 });
+io.sockets.on('connection', function (socket) {
+console.log('A client 2 is connected!');
+socket.on('msg2', function(...args) {
+
+    var d = {
+        //hardcode IP: 'computeIPAddress'
+        freemem: args[0],
+        totalmem: args[1],
+        uptime: args[2],
+        avgLoad: args[3],
+        cores: args[4]
+    }
+    client2 = d;
+
+//    console.log('Client says', ...args)
+
+})
+});
 server.listen(8080);
 
 let c = {};
@@ -123,8 +141,7 @@ router.get('/', function(req, res) {
                     console.log('We are ready to render the page now.')
                     let c = [];
 
-                    res.render('monitor', {container: result, computer: client1});
-
+                    res.render('monitor', {container: result, computer: client1, computer2: client2});
 
 
                 })
