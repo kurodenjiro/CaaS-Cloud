@@ -265,7 +265,7 @@ console.log("Starting now..............",dateTime.create().format('Y-m-d H:M:S')
           					//SSH and add IPtables rules
           					console.log("came here",usedports);
           					for (var i = 0; i < usedports.length; i++) {
-              					let sshCmd = 'sudo iptables -t nat -I PREROUTING -d '+ mgmtpublicip +'/24 -p tcp --dport '+ usedports[i].natport +' -j DNAT --to-destination '+computer.private_ip+':'+usedports[i].comport;
+              					let sshCmd = 'iptables -t nat -I PREROUTING -d '+ mgmtpublicip +'/24 -p tcp --dport '+ usedports[i].natport +' -j DNAT --to-destination '+computer.private_ip+':'+usedports[i].comport;
               					console.log(sshCmd);
 
                         exec(sshCmd, (e, stdout, stderr)=> {
@@ -298,7 +298,7 @@ console.log("Starting now..............",dateTime.create().format('Y-m-d H:M:S')
   		},errHandler).then(function(){
       				console.log("W completed");
 console.log("Ending now..............",dateTime.create().format('Y-m-d H:M:S'));
-      				res.render('myreservationspage');
+      				res.redirect('/dashboard');
   				},errHandler);
 
 /*

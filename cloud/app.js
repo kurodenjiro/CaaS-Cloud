@@ -47,7 +47,7 @@ app.use('/admindashboard', admindashboardRouter);
 app.use('/reservepage', reservepageRouter);
 app.use('/myreservationspage', getReservations);
 app.use('/billing', billing);
-app.use('/logout', logout);
+//app.use('/logout', logout);
 
 app.use('/reserve', reserveRouter);
 app.use('/monitor', monitorRouter);

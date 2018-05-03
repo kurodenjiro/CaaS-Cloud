@@ -46,7 +46,7 @@ router.post('/', function(req ,res) {
                         console.log(req.session.username);
                     }
                     if(results[0].type == 'admin')
-                        res.redirect('/monitor');
+                        res.redirect('/admindashboard');
                     else
                         res.redirect('/dashboard');
                 } 

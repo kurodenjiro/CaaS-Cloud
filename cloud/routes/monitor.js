@@ -33,7 +33,8 @@ socket.on('msg', function(...args) {
         cores: args[4]
     }
     client1 = d;
-    console.log('Client says', ...args)
+
+//    console.log('Client says', ...args)
 
 })
 });
@@ -67,6 +68,7 @@ router.get('/', function(req, res) {
             return new Promise(function(resolve, reject) {
                 con.query(conquery, function(err, conhashrows, fields) {
                     if (err) reject(err);
+		    console.log(conhashrows);
                     resolve(conhashrows);
                 });
             }).then(function(conhashrows) {
@@ -107,22 +109,19 @@ router.get('/', function(req, res) {
                                 console.log('Last round');
                                 resolve(c);
                             }
-
-                            // console.log(c);
+			    console.log(conhashrows.length,j);
+                            console.log(c);
                             // resolve(status);
 
                         }, errHandler);
+			console.log("iteration over:",j);
                     }
-                    // console.log('For loop is over', c);
+                     console.log('For loop is over', c);
                     // resolve(c);
                 }).then(function(result) {
                     console.log('This is final dictionary after running for loop', result);
                     console.log('We are ready to render the page now.')
                     let c = [];
-                    // for (let key in result) {
-                    //     c
-                    // }
-                    // var 'client1';
 
                     res.render('monitor', {container: result, computer: client1});
 

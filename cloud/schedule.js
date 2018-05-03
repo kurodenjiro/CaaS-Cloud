@@ -77,7 +77,7 @@ this.create_schedule = function (con, data, startdate, enddate)
 			{
 				if(host.used_ram/host.total_ram < ramratio)
 				{
-					console.log("newhost"+comid);
+					//console.log("newhost"+comid);
 					ramratio=host.used_ram/host.total_ram;
 					console.log("ramratio:"+ramratio);
  					chosen_host=host.comid;

@@ -47,7 +47,7 @@ router.post('/', function(req, res) {
 	        console.log("came here",natrows);
 	        for (var i = 0; i < natrows.length; i++) {
 	        	compute_ip=natrows[0].private_ip;
-	            let sshCmd = 'sudo iptables -t nat -D PREROUTING -d '+ natrows[i].public_ip +'/24 -p tcp --dport '+ natrows[i].natport +' -j DNAT --to-destination '+ natrows[i].private_ip +':'+ natrows[i].comport;
+	            let sshCmd = 'iptables -t nat -D PREROUTING -d '+ natrows[i].public_ip +'/24 -p tcp --dport '+ natrows[i].natport +' -j DNAT --to-destination '+ natrows[i].private_ip +':'+ natrows[i].comport;
 	            console.log(sshCmd);
 	            exec(sshCmd, (e, stdout, stderr)=> {
                     if (e instanceof Error) {
