@@ -38,7 +38,9 @@ console.log("Starting now..............",dateTime.create().format('Y-m-d H:M:S')
     }
 //    let day = new Date();
     console.log(startdate);
-    let enddate=startdate+data.duration;
+    dt.offsetInHours(parseInt(data.duration,10));
+    let enddate=dt.format('Y-m-d H:M:S');
+    console.log("Ending......",enddate);
 
 /*
 0. Scheduling -- check computer

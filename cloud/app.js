@@ -11,11 +11,12 @@ var signupRouter = require('./routes/signup');
 var reservepageRouter = require('./routes/reservepage');
 var reserveRouter = require('./routes/reserve');
 var deleteReservation = require('./routes/deleteReservation');
+var logoutRouter = require('./routes/userlogout');
 var loginRouter = require('./routes/login');
 var admindashboardRouter = require('./routes/admindashboard');
 var monitorRouter = require('./routes/monitor');
 var billing = require('./routes/billing');
-var logout = require('./routes/logout');
+
 
 var app = express();
 
@@ -39,6 +40,7 @@ app.use('/', indexRouter);
 app.use('/signup', signupRouter);
 app.use('/deleteReservation', deleteReservation);
 app.use('/login', loginRouter);
+app.use('/userlogout',logoutRouter);
 app.get('/dashboard', function(req, res) {
     console.log('THis is nice dashboard');
     res.render('dashboard');
@@ -47,12 +49,13 @@ app.use('/admindashboard', admindashboardRouter);
 app.use('/reservepage', reservepageRouter);
 app.use('/myreservationspage', getReservations);
 app.use('/billing', billing);
-//app.use('/logout', logout);
+
 
 app.use('/reserve', reserveRouter);
 app.use('/monitor', monitorRouter);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
+  console.log(req);
   next(createError(404));
 });
 
